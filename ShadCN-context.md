@@ -1,0 +1,1 @@
+# Componentes ShadCN UI Utilizados\n\nEsta lista rastreia os componentes ShadCN UI que foram adicionados a este projeto.\n\n- Button (`npx shadcn@latest add button`)\n- Card (`npx shadcn@latest add card`)\n- Avatar (`npx shadcn@latest add avatar`)\n- Label (`npx shadcn@latest add label`)\n- Input (`npx shadcn@latest add input`)\n- Textarea (`npx shadcn@latest add textarea`) 
