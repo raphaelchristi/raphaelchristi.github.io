@@ -2,6 +2,7 @@ import "@/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { NextThemeProvider } from "@/components/theme-provider";
 
 // TRPCReactProvider removido, pois a página atual do portfólio é estática
 // import { TRPCReactProvider } from "~/trpc/react";

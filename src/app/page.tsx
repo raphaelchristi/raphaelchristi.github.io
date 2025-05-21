@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Moon } from "lucide-react";
 import { TypingText } from "@/components/animate-ui/text/typing";
+import { ThemeToggleButton } from "@/components/theme-toggle-button";
 
 // --- ShadCN UI Component Imports ---
 // Certifique-se de ter adicionado estes componentes ao seu projeto via CLI
@@ -31,10 +31,7 @@ export default function PortfolioPage() {
             </Link>
           </nav>
           <div className="flex flex-1 items-center justify-end space-x-2">
-            <Button variant="ghost" size="icon" className="transition-colors duration-200">
-              <Moon className="h-5 w-5" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
+            <ThemeToggleButton />
           </div>
         </div>
       </header>
