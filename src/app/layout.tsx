@@ -4,14 +4,14 @@ import { type Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 
 export const metadata: Metadata = {
-  title: "Raphael Valdetaro - AI Engineer & Research Developer",
+  title: "Raphael Valdetaro - AI Engineer | AI Architect | Gen AI | LLM",
   description:
-    "Portfolio of Raphael Valdetaro, AI Engineer at the University of Porto. Specializing in LLMs, Generative AI, multi-agent systems, LangChain, and Python.",
+    "Portfolio of Raphael Valdetaro, AI Engineer & Architect at the University of Porto. Specializing in LLMs, Generative AI, multi-agent systems, LangChain, and Python.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
   openGraph: {
-    title: "Raphael Valdetaro - AI Engineer & Research Developer",
+    title: "Raphael Valdetaro - AI Engineer | AI Architect | Gen AI | LLM",
     description:
-      "AI Engineer specializing in LLMs, Generative AI, and multi-agent systems. Based in Porto, Portugal.",
+      "AI Engineer & Architect specializing in LLMs, Generative AI, and multi-agent systems. Based in Porto, Portugal.",
     type: "website",
   },
 };

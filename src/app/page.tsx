@@ -177,7 +177,7 @@ export default function PortfolioPage() {
                 <TypingText text="Raphael Valdetaro" cursor cursorClassName="!h-12 md:!h-16 lg:!h-20 !bg-primary" />
               </h1>
               <p className="mt-6 text-xl md:text-2xl text-gradient font-medium">
-                AI Engineer & Research Developer
+                AI Engineer | AI Architect | Gen AI | LLM
               </p>
               <p className="mt-4 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed">
                 Building the future with Large Language Models, Generative AI, and multi-agent systems.
@@ -227,18 +227,22 @@ export default function PortfolioPage() {
                 <p className="text-muted-foreground text-base leading-relaxed">
                   With strong expertise in Python and Data Science, I use tools like LangChain, LangFlow, LlamaIndex, Pydantic, Crew AI, n8n, and Google AI (ADK) to build advanced Generative AI applications. My approach is driven by creativity and innovation, always focused on delivering efficient solutions to complex problems.
                 </p>
-                <div className="mt-8 grid grid-cols-3 gap-6">
+                <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-6">
                   <div className="text-center md:text-left">
                     <p className="text-2xl font-bold text-foreground">33+</p>
                     <p className="text-sm text-muted-foreground">Public Repos</p>
                   </div>
                   <div className="text-center md:text-left">
-                    <p className="text-2xl font-bold text-foreground">50k+</p>
-                    <p className="text-sm text-muted-foreground">Lines of AI Code</p>
+                    <p className="text-2xl font-bold text-foreground">2.1k+</p>
+                    <p className="text-sm text-muted-foreground">LinkedIn Followers</p>
                   </div>
                   <div className="text-center md:text-left">
                     <p className="text-2xl font-bold text-foreground">R$50k</p>
                     <p className="text-sm text-muted-foreground">Prize Won</p>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <p className="text-2xl font-bold text-foreground">10k+</p>
+                    <p className="text-sm text-muted-foreground">IA Devs Participants</p>
                   </div>
                 </div>
               </div>
