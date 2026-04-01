@@ -117,6 +117,13 @@ Anything else is sent to the AI agent.`,
 function classifyIntent(msg: string): { agent: string } {
   const lower = msg.toLowerCase();
 
+  // Greetings / about me → Portfolio
+  if (
+    /(oi\b|olá|ola\b|hello|hi\b|hey\b|quem|who are|tell me about|sobre você|about you|apresent|seu nome|your name|experiencia|experience|educação|education|projeto|project|skill|habilidad|formação|trabalh|work)/.test(lower)
+  ) {
+    return { agent: "Portfolio Agent" };
+  }
+
   // Recruiter patterns
   if (
     /(hiring|hire|salary|contrat|disponib|remote|vagas?|seniorid|curricul|recrut|entrevista|contratar|linkedin|email|contact|cv\b|oportunid)/.test(lower)
@@ -126,12 +133,12 @@ function classifyIntent(msg: string): { agent: string } {
 
   // Technical patterns
   if (
-    /(arquitetura|architecture|code|código|como funciona|how does|implementa|technical|ceppem|langgraph|docker|redis|sandbox|pipeline|multi.?agent|como construiu|how did you build|design pattern)/.test(lower)
+    /(arquitetura|architecture|code|código|como funciona|how does|implementa|technical|ceppem|langgraph|docker|redis|sandbox|pipeline|multi.?agent|como construiu|how did you build|design pattern|stack|sistema|api\b)/.test(lower)
   ) {
     return { agent: "Technical Agent" };
   }
 
-  // Default: Portfolio
+  // Default: Portfolio (fallback is handled by the agent itself via system prompt)
   return { agent: "Portfolio Agent" };
 }
 
@@ -240,9 +247,9 @@ export function useAgentChat() {
       setMessages((prev) => [...prev, userMsg, routingMsg, assistantMsg]);
       setIsLoading(true);
 
-      // Build messages for API (only user/assistant, not file reads)
-      // No system prompt here — Hermes Agent has its own multi-agent routing prompt
+      // Build messages for API — send identity system prompt to override Hermes default
       const apiMessages = [
+        { role: "system" as const, content: systemPrompt.current },
         ...messages
           .filter((m) => m.role === "user" || m.role === "assistant")
           .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
