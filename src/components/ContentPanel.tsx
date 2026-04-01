@@ -6,6 +6,54 @@ import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
 import TerminalRenderer from "./TerminalRenderer";
 
+const PLACEHOLDER_HINTS = [
+  "What projects have you built?",
+  "Tell me about your skills",
+  "How can I contact you?",
+  "What's your experience with AI?",
+  "How does ceppem-ai work?",
+];
+
+function AnimatedPlaceholder({ visible }: { visible: boolean }) {
+  const [hintIndex, setHintIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!visible) return;
+    const hint = PLACEHOLDER_HINTS[hintIndex] ?? "";
+
+    if (!deleting && charIndex < hint.length) {
+      const timeout = setTimeout(() => setCharIndex((c) => c + 1), 40);
+      return () => clearTimeout(timeout);
+    }
+    if (!deleting && charIndex === hint.length) {
+      const timeout = setTimeout(() => setDeleting(true), 2000);
+      return () => clearTimeout(timeout);
+    }
+    if (deleting && charIndex > 0) {
+      const timeout = setTimeout(() => setCharIndex((c) => c - 1), 20);
+      return () => clearTimeout(timeout);
+    }
+    if (deleting && charIndex === 0) {
+      setDeleting(false);
+      setHintIndex((i) => (i + 1) % PLACEHOLDER_HINTS.length);
+    }
+  }, [visible, charIndex, deleting, hintIndex]);
+
+  if (!visible) return null;
+
+  const hint = PLACEHOLDER_HINTS[hintIndex] ?? "";
+  return (
+    <span
+      className="absolute pointer-events-none font-mono text-[13px] select-none"
+      style={{ color: "#3a4560", left: 0, top: 0 }}
+    >
+      {hint.slice(0, charIndex)}
+    </span>
+  );
+}
+
 function RoutingStatus({ agentName, done }: { agentName: string; done: boolean }) {
   const [phase, setPhase] = useState(0);
   const phases = [
@@ -205,17 +253,44 @@ export default function ContentPanel({
         style={{ backgroundColor: "#0a0e1a" }}
         onClick={focusInput}
       >
-        {/* Status line */}
-        {hasCheckedHealth && (
+        {/* Welcome block */}
+        {hasCheckedHealth && messages.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mb-3 font-mono text-[13px]"
-            style={{ color: "#7a8299" }}
+            className="mb-4"
           >
-            {chatEnabled
-              ? "Welcome to raphael.agent. Type a question or browse files."
-              : "Agent offline. Browse files to learn about Raphael."}
+            <div className="font-mono text-[13px] mb-2" style={{ color: "#c0c8e0" }}>
+              {chatEnabled
+                ? "Welcome to raphael.agent — an AI that knows my work."
+                : "Agent offline — browse files in the sidebar to learn about me."}
+            </div>
+            {chatEnabled && (
+              <>
+                <div className="font-mono text-[12px] mb-3" style={{ color: "#7a8299" }}>
+                  Ask me anything below, or type <span style={{ color: "#5070ff" }}>help</span> for commands.
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {["about me", "my projects", "my skills", "contact"].map((label) => (
+                    <button
+                      key={label}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSendMessage(label);
+                      }}
+                      className="font-mono text-[12px] px-3 py-1 rounded border transition-all hover:opacity-80"
+                      style={{
+                        color: "#5070ff",
+                        borderColor: "#1a2340",
+                        backgroundColor: "#0f1525",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </motion.div>
         )}
 
@@ -228,19 +303,22 @@ export default function ContentPanel({
         {!isLoading && (
           <div className="flex items-start font-mono text-[13px]">
             <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
-            <span
-              ref={inputRef}
-              contentEditable
-              suppressContentEditableWarning
-              onKeyDown={handleKeyDown}
-              onInput={handleInput}
-              className="outline-none min-w-[1px]"
-              style={{
-                color: "#e0e4ef",
-                caretColor: "transparent",
-              }}
-              spellCheck={false}
-            />
+            <span className="relative flex-1 min-w-[1px]">
+              <AnimatedPlaceholder visible={inputValue.length === 0 && messages.length === 0} />
+              <span
+                ref={inputRef}
+                contentEditable
+                suppressContentEditableWarning
+                onKeyDown={handleKeyDown}
+                onInput={handleInput}
+                className="outline-none inline-block min-w-[1px]"
+                style={{
+                  color: "#e0e4ef",
+                  caretColor: "transparent",
+                }}
+                spellCheck={false}
+              />
+            </span>
             <span
               className="animate-pulse inline-block"
               style={{
