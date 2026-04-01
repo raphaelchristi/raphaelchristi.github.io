@@ -1,8 +1,8 @@
 """
-FastAPI server exposing the multi-agent system.
-Endpoints:
-  POST /v1/chat/completions — OpenAI-compatible chat (streaming SSE)
-  GET  /health              — Health check
+FastAPI server with dual endpoints:
+  - /v1/chat/completions — OpenAI-compatible (for terminal chat fallback)
+  - /agent              — AG-UI protocol (for CopilotKit)
+  - /health             — Health check
 """
 
 import json
@@ -15,7 +15,7 @@ from fastapi.responses import StreamingResponse
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
 
-from agent import agent
+from agent import agent_graph
 
 app = FastAPI(title="raphael.agent")
 
@@ -26,6 +26,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- AG-UI endpoint for CopilotKit ---
+try:
+    from copilotkit import LangGraphAGUIAgent
+    from ag_ui_langgraph import add_langgraph_fastapi_endpoint
+
+    copilot_agent = LangGraphAGUIAgent(
+        name="raphael_agent",
+        description="Raphael Valdetaro's multi-agent portfolio system",
+        graph=agent_graph,
+    )
+
+    add_langgraph_fastapi_endpoint(app=app, agent=copilot_agent, path="/agent")
+    print("✅ CopilotKit AG-UI endpoint enabled at /agent")
+except ImportError as e:
+    print(f"⚠️ CopilotKit AG-UI not available: {e}")
+except Exception as e:
+    print(f"⚠️ CopilotKit AG-UI setup error: {e}")
+
+
+# --- OpenAI-compatible endpoint (fallback for terminal) ---
 
 class ChatMessage(BaseModel):
     role: str
@@ -40,17 +60,12 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "platform": "raphael-agent", "engine": "langgraph"}
+    return {"status": "ok", "platform": "raphael-agent", "engine": "langgraph", "copilotkit": True}
 
 
 @app.post("/v1/chat/completions")
 async def chat_completions(request: ChatRequest):
-    # Convert to LangChain messages
-    lc_messages = []
-    for msg in request.messages:
-        if msg.role == "user":
-            lc_messages.append(HumanMessage(content=msg.content))
-
+    lc_messages = [HumanMessage(content=m.content) for m in request.messages if m.role == "user"]
     if not lc_messages:
         lc_messages = [HumanMessage(content="hello")]
 
@@ -58,45 +73,26 @@ async def chat_completions(request: ChatRequest):
 
     if request.stream:
         async def stream_response():
-            # Run the agent
-            result = agent.invoke({
-                "messages": lc_messages,
-                "current_agent": "",
-            })
-
-            # Get the last AI message
+            result = agent_graph.invoke({"messages": lc_messages, "current_agent": ""})
             ai_messages = [m for m in result["messages"] if hasattr(m, "content") and m.content]
-            content = ai_messages[-1].content if ai_messages else "I'm here. How can I help?"
-            routed_to = result.get("current_agent", "portfolio")
+            content = ai_messages[-1].content if ai_messages else "I'm here."
 
-            # Stream content
             batch_size = 3
             for i in range(0, len(content), batch_size):
-                text_chunk = content[i : i + batch_size]
                 chunk = {
                     "id": chat_id,
                     "object": "chat.completion.chunk",
                     "model": "raphael-agent",
-                    "choices": [{"index": 0, "delta": {"content": text_chunk}}],
+                    "choices": [{"index": 0, "delta": {"content": content[i:i + batch_size]}}],
                 }
                 yield f"data: {json.dumps(chunk)}\n\n"
-
             yield "data: [DONE]\n\n"
 
-        return StreamingResponse(
-            stream_response(),
-            media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
-        )
+        return StreamingResponse(stream_response(), media_type="text/event-stream")
     else:
-        # Non-streaming
-        result = agent.invoke({
-            "messages": lc_messages,
-            "current_agent": "",
-        })
+        result = agent_graph.invoke({"messages": lc_messages, "current_agent": ""})
         ai_messages = [m for m in result["messages"] if hasattr(m, "content") and m.content]
         content = ai_messages[-1].content if ai_messages else "I'm here."
-
         return {
             "id": chat_id,
             "object": "chat.completion",
@@ -107,6 +103,4 @@ async def chat_completions(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-
-    port = int(os.getenv("PORT", "8642"))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

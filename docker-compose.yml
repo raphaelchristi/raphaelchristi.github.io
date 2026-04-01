@@ -1,27 +1,44 @@
 services:
+  # Python LangGraph multi-agent backend
   agent:
     build:
       context: ./backend
+      dockerfile: Dockerfile
+    container_name: langgraph-agent
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - MODEL_NAME=google/gemini-3.1-flash-lite-preview
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # Node.js CopilotKit Runtime (thin proxy)
+  runtime:
+    build:
+      context: ./backend/runtime
       dockerfile: Dockerfile
     container_name: hermes-agent
     restart: unless-stopped
     ports:
       - "8642:8642"
     environment:
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - MODEL_NAME=google/gemini-3.1-flash-lite-preview
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8642/health')"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
+      - AGENT_URL=http://agent:8000/agent
+      - PORT=8642
+    depends_on:
+      agent:
+        condition: service_healthy
 
+  # Cloudflare Tunnel → CopilotKit Runtime
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate --protocol http2 run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
-      agent:
-        condition: service_healthy
+      - runtime
