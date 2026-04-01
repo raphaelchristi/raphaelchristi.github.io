@@ -3,7 +3,7 @@
 export default function JsonRenderer({ content }: { content: string }) {
   let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(content);
+    parsed = JSON.parse(content) as Record<string, unknown>;
   } catch {
     return (
       <pre className="font-mono text-sm" style={{ color: "var(--foreground)" }}>
