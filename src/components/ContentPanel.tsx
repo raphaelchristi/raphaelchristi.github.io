@@ -55,7 +55,7 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
   if (msg.role === "user") {
     return (
       <div className="mb-1">
-        <span className="font-mono text-[13px]" style={{ color: "#78d97c" }}>$ </span>
+        <span className="font-mono text-[13px]"><span style={{ color: "#78d97c" }}>raphael@agent</span><span style={{ color: "#ccc" }}>:</span><span style={{ color: "#6cb6ff" }}>~</span><span style={{ color: "#ccc" }}>$ </span></span>
         <span className="font-mono text-[13px]" style={{ color: "#f0f0f0" }}>{msg.content}</span>
       </div>
     );
