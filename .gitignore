@@ -61,4 +61,4 @@ hermes-data/models_dev_cache.json
 hermes-data/SOUL.md
 hermes-data/.skills_prompt_snapshot.json
 hermes-data/bin/
-hermes-agent/
+hermes-agent/hermes-data/cache/
