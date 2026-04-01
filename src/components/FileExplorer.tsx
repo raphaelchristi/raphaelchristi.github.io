@@ -29,43 +29,69 @@ export default function FileExplorer() {
 
   return (
     <section
-      className="w-full border-t"
-      style={{
-        borderColor: "var(--border)",
-        height: "calc(100vh - 100px)",
-        minHeight: "500px",
-      }}
+      className="w-full"
+      aria-label="File explorer"
+      style={{ borderTop: "2px solid var(--window-border-dark)" }}
     >
-      {/* Mobile toggle */}
+      {/* Mobile toggle bar */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="md:hidden w-full flex items-center gap-2 px-4 py-2 text-[13px] font-mono border-b"
+        className="md:hidden w-full flex items-center gap-2 px-3 py-1 text-[11px] font-sans"
         style={{
-          backgroundColor: "var(--sidebar-bg)",
-          color: "var(--muted)",
-          borderColor: "var(--border)",
+          backgroundColor: "var(--window-bg)",
+          color: "var(--foreground)",
+          borderBottom: "1px solid var(--window-border-dark)",
         }}
+        aria-expanded={sidebarOpen}
+        aria-controls="explorer-sidebar"
       >
         <span>{sidebarOpen ? "▼" : "▶"}</span>
-        <span>EXPLORER</span>
-        <span style={{ color: "var(--foreground)" }}>{selectedPath}</span>
+        <span style={{ fontWeight: "bold" }}>Folders</span>
+        <span style={{ color: "#444" }}>{selectedPath}</span>
       </button>
 
-      <div className="flex" style={{ height: "calc(100% - 28px)" }}>
-        {/* Sidebar */}
+      {/* Main explorer body */}
+      <div
+        style={{
+          display: "flex",
+          height: "calc(100vh - 260px)",
+          minHeight: "400px",
+          backgroundColor: "var(--window-bg)",
+        }}
+      >
+        {/* Left panel: folder tree */}
         <div
-          className={`
-            ${sidebarOpen ? "block" : "hidden"} md:block
-            w-full md:w-[280px] md:min-w-[280px]
-            border-r overflow-y-auto shrink-0
-            absolute md:relative z-20 md:z-auto
-          `}
+          id="explorer-sidebar"
+          className={`${sidebarOpen ? "block" : "hidden"} md:block`}
           style={{
-            backgroundColor: "var(--sidebar-bg)",
-            borderColor: "var(--border)",
-            height: sidebarOpen ? "calc(100vh - 320px)" : undefined,
+            width: "220px",
+            minWidth: "220px",
+            borderRight: "2px solid var(--window-border-dark)",
+            overflowY: "auto",
+            backgroundColor: "var(--window-bg)",
+            flexShrink: 0,
           }}
         >
+          {/* Sidebar header */}
+          <div
+            style={{
+              background: "linear-gradient(to bottom, #1a6ec7, #1458a8)",
+              color: "#ffffff",
+              fontFamily: '"Tahoma", sans-serif',
+              fontSize: "11px",
+              fontWeight: "bold",
+              padding: "4px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <rect x="0" y="2" width="12" height="9" rx="0" fill="#ffcc00" stroke="#cc9900" strokeWidth="1" />
+              <rect x="0" y="1" width="5" height="3" rx="0" fill="#ffcc00" stroke="#cc9900" strokeWidth="1" />
+            </svg>
+            Folders
+          </div>
           <FileTree
             files={agentFileTree}
             selectedPath={selectedPath}
@@ -73,10 +99,15 @@ export default function FileExplorer() {
           />
         </div>
 
-        {/* Content panel with chat */}
+        {/* Right panel: content + chat */}
         <div
-          className="flex-1 flex flex-col min-h-0"
-          style={{ backgroundColor: "var(--background)" }}
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            minWidth: 0,
+            backgroundColor: "#ffffff",
+          }}
         >
           <ContentPanel
             selectedFile={selectedFile}
@@ -93,48 +124,42 @@ export default function FileExplorer() {
 
       {/* Status bar */}
       <div
-        style={{
-          height: "28px",
-          background: "#0f1525",
-          borderTop: "1px solid #1a2340",
-          display: "flex",
-          alignItems: "center",
-          padding: "0 16px",
-          fontSize: "12px",
-          fontFamily: "monospace",
-          color: "#7a8299",
-          gap: "16px",
-        }}
+        className="win-statusbar"
+        role="status"
+        aria-live="polite"
       >
-        <a
-          href="https://github.com/raphaelchristi"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "#5070ff", textDecoration: "none" }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
-        >
-          github
-        </a>
-        <a
-          href="https://www.linkedin.com/in/raphael-valdetaro/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "#5070ff", textDecoration: "none" }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
-        >
-          linkedin
-        </a>
-        <a
-          href="mailto:raphaelvaldetaro@gmail.com"
-          style={{ color: "#5070ff", textDecoration: "none" }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
-        >
-          email
-        </a>
-        <span style={{ marginLeft: "auto" }}>Online · Rio de Janeiro, RJ</span>
+        <div className="win-statusbar-panel" style={{ flex: 1 }}>
+          {selectedPath
+            ? `${selectedPath}`
+            : "Select a file to view its contents"}
+        </div>
+        <div className="win-statusbar-panel" style={{ minWidth: "120px" }}>
+          <a
+            href="https://github.com/raphaelchristi"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#000080", textDecoration: "underline", marginRight: "8px" }}
+          >
+            github
+          </a>
+          <a
+            href="https://www.linkedin.com/in/raphael-valdetaro/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#000080", textDecoration: "underline", marginRight: "8px" }}
+          >
+            linkedin
+          </a>
+          <a
+            href="mailto:raphaelvaldetaro@gmail.com"
+            style={{ color: "#000080", textDecoration: "underline" }}
+          >
+            email
+          </a>
+        </div>
+        <div className="win-statusbar-panel">
+          Online · Rio de Janeiro, RJ
+        </div>
       </div>
     </section>
   );

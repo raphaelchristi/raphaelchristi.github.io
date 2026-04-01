@@ -4,78 +4,289 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
-    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-sans: "Tahoma", "MS Sans Serif", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Courier New", ui-monospace, monospace;
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: #0a0e1a;
-  --foreground: #e0e4ef;
-  --muted: #7a8299;
-  --accent: #5070ff;
-  --primary: #5070ff;
-  --sidebar-bg: #0f1525;
-  --border: #1a2340;
-  --selected: #1a2340;
-  --tab-bg: #0f1525;
-  --json-key: #5070ff;
-  --json-string: #a5b4fc;
-  --json-punct: #7a8299;
+  --radius: 0px;
+
+  /* Windows 2000 color palette */
+  --background: #008080;          /* classic teal desktop */
+  --foreground: #000000;          /* black text */
+  --muted: #444444;
+  --accent: #000080;              /* navy blue (title bar active) */
+  --primary: #000080;
+
+  /* Window chrome */
+  --window-bg: #d4d0c8;          /* classic grey */
+  --window-title-active: #000080; /* navy title bar */
+  --window-title-inactive: #7a96df;
+  --window-title-text: #ffffff;
+  --window-body: #ffffff;
+  --window-border-light: #ffffff;
+  --window-border-dark: #808080;
+  --window-border-darker: #404040;
+  --window-border-highlight: #dfdfdf;
+
+  /* Sidebar */
+  --sidebar-bg: #d4d0c8;
+  --border: #808080;
+  --selected: #000080;
+  --selected-text: #ffffff;
+
+  /* Status bar */
+  --statusbar-bg: #d4d0c8;
+
+  /* Tab */
+  --tab-bg: #d4d0c8;
+
+  /* Inset panel (like textarea background) */
+  --inset-bg: #ffffff;
+  --inset-border: #808080;
 }
 
 @layer base {
   * {
     @apply border-[var(--border)];
+    box-sizing: border-box;
   }
   body {
     background-color: var(--background);
-    background-image: radial-gradient(rgba(48, 80, 255, 0.04) 1px, transparent 1px);
-    background-size: 32px 32px;
+    background-image: none;
     color: var(--foreground);
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
   }
 }
 
-/* Ambient glow blobs */
-.ambient-glow {
+/* === Win2000 3D Bevel Helpers === */
+.win-raised {
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-light) var(--window-border-darker) var(--window-border-darker) var(--window-border-light);
+}
+
+.win-inset {
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-dark) var(--window-border-highlight) var(--window-border-highlight) var(--window-border-dark);
+}
+
+.win-button {
+  background-color: var(--window-bg);
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-light) var(--window-border-darker) var(--window-border-darker) var(--window-border-light);
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  cursor: default;
+  padding: 2px 8px;
+  min-width: 75px;
+  text-align: center;
+  color: var(--foreground);
+  user-select: none;
+}
+
+.win-button:active {
+  border-color: var(--window-border-darker) var(--window-border-light) var(--window-border-light) var(--window-border-darker);
+  padding-top: 3px;
+  padding-left: 9px;
+}
+
+.win-title-bar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #ffffff;
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  height: 22px;
+  user-select: none;
+}
+
+.win-title-button {
+  width: 16px;
+  height: 14px;
+  background-color: #d4d0c8;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  font-size: 9px;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  color: #000000;
+  margin-left: 2px;
+  font-family: "Marlett", "Tahoma", sans-serif;
+  flex-shrink: 0;
+}
+
+.win-title-button:active {
+  border-color: #404040 #ffffff #ffffff #404040;
+}
+
+.win-window {
+  background-color: var(--window-bg);
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-light) var(--window-border-darker) var(--window-border-darker) var(--window-border-light);
+}
+
+/* Menu bar */
+.win-menubar {
+  background-color: var(--window-bg);
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--window-border-dark);
+}
+
+.win-menuitem {
+  padding: 2px 6px;
+  cursor: default;
+  color: var(--foreground);
+}
+
+.win-menuitem:hover {
+  background-color: #000080;
+  color: #ffffff;
+}
+
+/* Toolbar */
+.win-toolbar {
+  background-color: var(--window-bg);
+  border-bottom: 1px solid var(--window-border-dark);
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+}
+
+/* Address bar */
+.win-addressbar {
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-dark) var(--window-border-light) var(--window-border-light) var(--window-border-dark);
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  padding: 1px 4px;
+  flex: 1;
+}
+
+/* Status bar */
+.win-statusbar {
+  background-color: var(--window-bg);
+  border-top: 1px solid var(--window-border-dark);
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  padding: 2px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+
+.win-statusbar-panel {
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--window-border-dark) var(--window-border-light) var(--window-border-light) var(--window-border-dark);
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+/* Taskbar */
+.win-taskbar {
+  background: linear-gradient(to bottom, #1c6bb5 0%, #245faa 40%, #1a55a0 100%);
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  gap: 4px;
+  border-top: 1px solid #3a8fd4;
   position: fixed;
-  pointer-events: none;
-  z-index: 0;
-  border-radius: 50%;
-  filter: blur(120px);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
 }
 
-.glow-1 {
-  width: 600px;
-  height: 600px;
-  background: #3050FF;
-  top: -200px;
-  left: -200px;
-  opacity: 0.08;
+.win-start-button {
+  background: linear-gradient(to bottom, #4da847 0%, #3a8c3a 100%);
+  border-style: solid;
+  border-width: 1px;
+  border-color: #8bc48b #1a5c1a #1a5c1a #8bc48b;
+  color: #ffffff;
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 10px 2px 8px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  border-radius: 0 10px 10px 0;
 }
 
-.glow-2 {
-  width: 500px;
-  height: 500px;
-  background: #2040CC;
-  bottom: 20%;
-  right: -150px;
-  opacity: 0.06;
+.win-taskbar-clock {
+  margin-left: auto;
+  color: #ffffff;
+  font-family: "Tahoma", sans-serif;
+  font-size: 11px;
+  padding: 2px 8px;
+  background-color: rgba(0,0,0,0.2);
+  border-left: 1px solid rgba(255,255,255,0.2);
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
+/* Input field Win2000 style */
+.win-input {
+  background-color: #ffffff;
+  border-style: solid;
+  border-width: 2px;
+  border-color: var(--window-border-dark) var(--window-border-light) var(--window-border-light) var(--window-border-dark);
+  font-family: "Tahoma", "MS Sans Serif", sans-serif;
+  font-size: 11px;
+  color: #000000;
+  padding: 2px 4px;
+  outline: none;
+  width: 100%;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 16px;
+  height: 16px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: #d4d0c8;
+  border: 1px solid #808080;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: #d4d0c8;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ffffff #404040 #404040 #ffffff;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+::-webkit-scrollbar-button {
+  background: #d4d0c8;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #ffffff #404040 #404040 #ffffff;
+  display: block;
+  height: 16px;
+  width: 16px;
 }

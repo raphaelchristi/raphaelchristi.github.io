@@ -11,19 +11,37 @@ type Props = {
 
 export default function FileTree({ files, selectedPath, onSelect }: Props) {
   return (
-    <div className="py-2">
-      <p
-        className="px-4 py-2 text-[11px] font-semibold tracking-widest uppercase"
-        style={{ color: "var(--muted)" }}
+    <nav aria-label="File tree navigation" style={{ paddingBottom: "8px" }}>
+      {/* Desktop icon row at top */}
+      <div
+        style={{
+          padding: "8px 8px 4px 8px",
+          borderBottom: "1px solid #c0bdb4",
+          marginBottom: "2px",
+        }}
       >
-        Explorer
-      </p>
-      <p
-        className="px-4 pb-2 text-[12px] font-mono"
-        style={{ color: "var(--muted)" }}
-      >
-        raphael.agent
-      </p>
+        <p
+          style={{
+            fontFamily: '"Tahoma", sans-serif',
+            fontSize: "11px",
+            color: "#000080",
+            fontWeight: "bold",
+            marginBottom: "2px",
+          }}
+        >
+          raphael.agent
+        </p>
+        <p
+          style={{
+            fontFamily: '"Tahoma", sans-serif',
+            fontSize: "10px",
+            color: "#666666",
+          }}
+        >
+          C:\portfolio\agent\
+        </p>
+      </div>
+
       {files.map((file) => (
         <FileTreeItem
           key={file.name}
@@ -34,6 +52,6 @@ export default function FileTree({ files, selectedPath, onSelect }: Props) {
           parentPath=""
         />
       ))}
-    </div>
+    </nav>
   );
 }
