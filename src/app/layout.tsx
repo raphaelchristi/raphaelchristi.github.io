@@ -4,9 +4,9 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "RAPHAEL.AGENT — Research Engineer & LLM Developer",
+  title: "Raphael Valdetaro · Multi-Agent AI Engineer",
   description:
-    "Raphael Valdetaro — Research Engineer & LLM Developer. AI agent-themed portfolio.",
+    "Raphael Valdetaro — AI Engineer especializado em multi-agent systems com LangGraph e Claude. Rio de Janeiro, Brazil.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

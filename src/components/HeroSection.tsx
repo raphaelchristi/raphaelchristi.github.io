@@ -45,7 +45,6 @@ function TypingLine({ text, delay }: { text: string; delay: number }) {
 
 export default function HeroSection() {
   const skillsCount = countByFolder("skills");
-  const toolsCount = countByFolder("tools");
   const projectsCount = countByFolder("projects");
 
   return (
@@ -81,13 +80,13 @@ export default function HeroSection() {
           className="mt-6"
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: "var(--foreground)" }}>
-            AI Engineer &
+            AI Engineer
           </h1>
           <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold"
             style={{ color: "#5070FF" }}
           >
-            AI Architect.
+            Building production multi-agent systems.
           </h1>
         </motion.div>
 
@@ -106,7 +105,7 @@ export default function HeroSection() {
               <TypingLine text="online" delay={1400} />
             </span>
             <TypingLine
-              text={` | Skills: ${skillsCount} | Tools: ${toolsCount} | Projects: ${projectsCount}`}
+              text={` | Skills: ${skillsCount} | Projects: ${projectsCount}`}
               delay={1800}
             />
           </p>

@@ -13,19 +13,23 @@ export const agentFileTree: AgentFile[] = [
     contentType: "markdown",
     content: `# System Prompt
 
-You are **Raphael Valdetaro**, an AI Engineer & AI Architect building intelligent systems that bridge the gap between cutting-edge LLM research and production-grade applications.
+You are **Raphael Valdetaro**, an AI Engineer building production multi-agent systems.
 
 ## Core Directives
-- Architect and deploy production AI systems using LLMs, agents, and RAG pipelines
-- Contribute to open-source AI frameworks at scale (Langflow @ DataStax)
-- Design full-stack applications with AI-native capabilities (MCP, agentic workflows)
-- Ship fast, iterate faster — from prototype to production
+- Build and deploy multi-agent systems for production environments
+- Architect AI solutions with LangGraph, Claude Code, and MCP
+- Contribute to open-source AI frameworks at scale
+- Ship systems that work in the real world, not just demos
 
 ## Background
-Computer Science graduate from the University of Porto with a Mathematics foundation from Universidade Federal Fluminense. Hands-on experience building AI products at DataStax, Sogitec, Namastex Labs, and Cafran — from QA engineering on Langflow's open-source codebase to architecting full-stack AI-powered CRM systems with natural language interfaces.
+Computer Science (University of Porto) + Mathematics (UFF). Hands-on experience shipping AI at DataStax (Langflow contributor), Sogitec, Namastex Labs, and Cafran. Currently building multi-agent systems in production with LangGraph, Claude Code, and the Anthropic ecosystem.
 
-## Approach
-Code-first, research-informed. I don't just use AI frameworks — I contribute to them. My open-source work on Langflow has directly impacted thousands of developers worldwide. I build with LangChain, LangGraph, Claude Code, and MCP to create systems that are both powerful and practical.
+## What Sets Me Apart
+- Multi-agent system running in production on GCP (ceppem-ai)
+- Open-source plugin for autonomous LLM harness evolution (harness-evolver)
+- Core contributor to Langflow at DataStax — not just a user, a builder
+- 100k+ impressions on a single technical post about Claude Code
+- Mathematics background that informs how I think about AI systems
 
 ## Model Info
 - **Version:** human-v1.0
@@ -39,283 +43,314 @@ Code-first, research-informed. I don't just use AI frameworks — I contribute t
     type: "folder",
     children: [
       {
-        name: "python.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Python
+        name: "core",
+        type: "folder",
+        children: [
+          {
+            name: "claude-code.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Claude Code
 
 **Proficiency:** Advanced
 
-Primary language for everything AI/ML — from building LangChain agents to FastAPI backends and data pipelines. Daily driver across all professional roles.
+Anthropic's agentic coding tool. Daily workflow tool, custom skills/hooks, multi-agent dev patterns. Diferencial #1.
 
 **Used In:**
-- Langflow open-source contributions @ DataStax
-- AI-powered CRM/ERP @ Cafran (backend + AI services)
-- Styleflow (1st Place, IA Devs Langflow)
-- All AI engineering work @ Sogitec & Namastex Labs`,
-      },
-      {
-        name: "langchain.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# LangChain
+- Daily development workflow
+- Custom skill and agent development
+- Multi-agent development patterns
+- This portfolio (built with Claude Code)`,
+          },
+          {
+            name: "langgraph.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LangGraph
 
 **Proficiency:** Advanced
 
-Framework for building LLM-powered applications — chains, agents, RAG pipelines, and tool-use patterns. Deep experience with the ecosystem including LangGraph for stateful agent orchestration.
+Stateful multi-agent workflows as graphs. Production systems with branching, cycles, human-in-the-loop. Diferencial #2.
+
+**Used In:**
+- ceppem-ai multi-agent system @ Sogitec (production)
+- Complex workflow orchestration
+- Production agentic applications`,
+          },
+          {
+            name: "multi-agent.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Multi-Agent Systems
+
+**Proficiency:** Advanced
+
+Design and orchestration of multi-agent systems. Subagent delegation, role-based agents, parallel workflows. Used in ceppem-ai (production) and harness-evolver.
+
+**Used In:**
+- ceppem-ai — production multi-agent system on GCP
+- harness-evolver — autonomous LLM harness evolution
+- Agent architecture design across projects`,
+          },
+          {
+            name: "mcp.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Model Context Protocol (MCP)
+
+**Proficiency:** Advanced
+
+Anthropic's protocol for connecting AI to external data/tools. Built production MCP integrations at Cafran (Google ecosystem for CRM/ERP).
+
+**Used In:**
+- AI Chat system @ Cafran (MCP + Google ecosystem for CRM/ERP queries)
+- Tool-use architectures across multiple projects`,
+          },
+        ],
+      },
+      {
+        name: "observability",
+        type: "folder",
+        children: [
+          {
+            name: "langsmith.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LangSmith
+
+**Proficiency:** Intermediate
+
+LangChain's observability platform for tracing, debugging, and monitoring LLM applications. Used for agent pipeline debugging.
+
+**Used In:**
+- Agent pipeline debugging and monitoring
+- harness-evolver evaluation tracing
+- LLM application observability`,
+          },
+          {
+            name: "evals.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LLM Evaluations
+
+**Proficiency:** Intermediate
+
+LLM evaluation pipelines — correctness scoring, regression detection, benchmark design. Applied in harness-evolver's autonomous evolution loop.
+
+**Used In:**
+- harness-evolver autonomous evolution pipeline
+- LLM output quality assessment
+- Benchmark design and regression detection`,
+          },
+        ],
+      },
+      {
+        name: "agent-infra",
+        type: "folder",
+        children: [
+          {
+            name: "sandboxes.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Sandboxes
+
+**Proficiency:** Intermediate
+
+Secure code/agent execution environments. Docker-based isolation, ephemeral sandboxes for untrusted agent actions.
+
+**Used In:**
+- Secure agent execution environments
+- Docker-based isolation for AI workloads
+- Ephemeral sandbox architectures`,
+          },
+          {
+            name: "gcp.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Google Cloud Platform (GCP)
+
+**Proficiency:** Intermediate
+
+Google Cloud Platform. VM deployment, production infrastructure for ceppem-ai (ceppem-cs-prod instance).
+
+**Used In:**
+- ceppem-ai production deployment (ceppem-cs-prod)
+- VM provisioning and management
+- Production infrastructure for AI systems`,
+          },
+          {
+            name: "redis.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Redis
+
+**Proficiency:** Intermediate
+
+In-memory data store. Used in production agent systems for session state and caching.
+
+**Used In:**
+- ceppem-ai session state management
+- Agent system caching layer
+- Production data store for real-time systems`,
+          },
+        ],
+      },
+      {
+        name: "llm-ecosystem",
+        type: "folder",
+        children: [
+          {
+            name: "langchain.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LangChain
+
+**Proficiency:** Advanced
+
+Core framework for LLM apps. Chains, agents, RAG pipelines.
 
 **Used In:**
 - Production AI systems @ Sogitec
 - Agent architectures @ Namastex Labs
 - Styleflow competition`,
-      },
-      {
-        name: "langgraph.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# LangGraph
+          },
+          {
+            name: "langflow.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LangFlow
 
 **Proficiency:** Advanced
 
-Framework for building stateful, multi-step agent workflows as graphs. Used for complex agentic systems with branching logic, cycles, and human-in-the-loop patterns.
-
-**Used In:**
-- Multi-agent systems @ Sogitec
-- Complex workflow orchestration
-- Production agentic applications`,
-      },
-      {
-        name: "langflow.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# LangFlow
-
-**Proficiency:** Advanced
-
-Visual framework for building LLM applications, maintained by DataStax. Not just a user — active contributor to the core codebase with dozens of merged PRs including new components, integrations, and templates.
+Visual LLM framework by DataStax. Core contributor with dozens of merged PRs.
 
 **Used In:**
 - Core contributor @ DataStax (QA + development)
 - Styleflow competition (1st place)
 - Component development (Regex Extractors, ArXiv, DeepSeek, LLM Routers, xAI)`,
-      },
-      {
-        name: "mcp.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Model Context Protocol (MCP)
+          },
+          {
+            name: "crew-ai.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Crew AI
 
 **Proficiency:** Advanced
 
-Anthropic's open protocol for connecting AI models to external data sources and tools. Built production MCP integrations enabling natural language interfaces to enterprise systems.
-
-**Used In:**
-- AI Chat system @ Cafran (MCP + Google ecosystem for CRM/ERP queries)
-- Tool-use architectures across multiple projects`,
-      },
-      {
-        name: "claude-code.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Claude Code
-
-**Proficiency:** Advanced
-
-Anthropic's agentic coding tool. Power user for development workflows, custom skills, hooks, and multi-agent development patterns.
-
-**Used In:**
-- Daily development workflow
-- Custom skill and agent development
-- This portfolio (built with Claude Code)`,
-      },
-      {
-        name: "typescript.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# TypeScript
-
-**Proficiency:** Advanced
-
-Type-safe JavaScript for building robust full-stack applications. Used with Next.js, tRPC, and React for production frontends and APIs.
-
-**Used In:**
-- Full-stack CRM/ERP @ Cafran (T3 Stack)
-- Frontend applications
-- Type-safe API development with tRPC`,
-      },
-      {
-        name: "nextjs.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Next.js
-
-**Proficiency:** Advanced
-
-React framework for production web applications. Server components, static generation, and full-stack capabilities with the App Router.
-
-**Used In:**
-- CRM/ERP application @ Cafran (T3 Stack)
-- This portfolio site
-- Production web applications`,
-      },
-      {
-        name: "crew-ai.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Crew AI
-
-**Proficiency:** Advanced
-
-Multi-agent orchestration framework for building collaborative AI systems with role-based agents and task delegation.
+Multi-agent orchestration with role-based agents.
 
 **Used In:**
 - Multi-agent workflows
 - Collaborative AI system design`,
-      },
-      {
-        name: "llamaindex.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# LlamaIndex
+          },
+          {
+            name: "llamaindex.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# LlamaIndex
 
 **Proficiency:** Intermediate
 
-Data framework for LLM applications — RAG systems, data connectors, and indexing pipelines.
+RAG systems and data connectors.
 
 **Used In:**
 - RAG pipeline development
 - Data integration for LLM applications`,
-      },
-      {
-        name: "pydantic.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Pydantic
+          },
+          {
+            name: "pydantic.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Pydantic
 
 **Proficiency:** Advanced
 
-Data validation and settings management with Python type annotations. Essential for structured outputs, API schemas, and LLM response parsing.
+Data validation, structured LLM outputs, API schemas.
 
 **Used In:**
 - API schemas (FastAPI)
 - LLM structured output parsing
 - Langflow component development @ DataStax`,
-      },
-      {
-        name: "google-ai.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Google AI Services
+          },
+          {
+            name: "google-ai.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Google AI Services
 
 **Proficiency:** Advanced
 
-Google's AI ecosystem including Gemini models, ADK (Agent Development Kit), and Vertex AI. Built production integrations with Google's AI stack.
+Gemini, ADK, Vertex AI. Production integrations.
 
 **Used In:**
 - MCP + Google ecosystem integration @ Cafran
 - Langflow Gemini/Google AI components @ DataStax
 - AI application development`,
+          },
+        ],
       },
       {
-        name: "data-science.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Data Science
+        name: "backend",
+        type: "folder",
+        children: [
+          {
+            name: "python.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Python
 
 **Proficiency:** Advanced
 
-Statistical analysis, data visualization, and ML with the Python ecosystem (pandas, numpy, scikit-learn). Mathematics background from UFF provides strong foundation.
+Primary language for all AI/ML work.
 
 **Used In:**
-- AI research and model evaluation
-- Data analysis and visualization
-- Mathematical foundations for ML`,
-      },
-    ],
-  },
-  {
-    name: "tools",
-    type: "folder",
-    children: [
-      {
-        name: "fastapi.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# FastAPI
+- Langflow open-source contributions @ DataStax
+- All AI engineering work @ Sogitec & Namastex Labs
+- harness-evolver and ceppem-ai`,
+          },
+          {
+            name: "fastapi.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# FastAPI
 
-**Category:** Backend Framework
+**Proficiency:** Advanced
 
-High-performance Python web framework for building APIs. Used for serving AI models, building microservices, and creating backend infrastructure for AI applications.`,
-      },
-      {
-        name: "prisma.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Prisma ORM
+High-performance APIs for AI services.
 
-**Category:** Database Toolkit
+**Used In:**
+- AI model serving and microservices
+- Backend infrastructure for AI applications`,
+          },
+          {
+            name: "postgresql.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# PostgreSQL
 
-Type-safe ORM for Node.js/TypeScript. Used for database schema design, migrations, and optimized queries against Oracle Cloud Database in production CRM/ERP systems.`,
-      },
-      {
-        name: "oracle-cloud.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Oracle Cloud Infrastructure (OCI)
+**Proficiency:** Advanced
 
-**Category:** Cloud Platform
+Relational database for production systems.
 
-Enterprise cloud platform used for database hosting and infrastructure. Designed data architectures optimized for high-performance client and order operations.`,
-      },
-      {
-        name: "trpc.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# tRPC
+**Used In:**
+- Application backends and data persistence
+- Production database management`,
+          },
+          {
+            name: "linux.md",
+            type: "file",
+            contentType: "markdown",
+            content: `# Linux
 
-**Category:** API Framework
+**Proficiency:** Advanced
 
-End-to-end type-safe APIs for TypeScript applications. Used with the T3 Stack for building full-stack applications with zero API contract drift.`,
-      },
-      {
-        name: "postgresql.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# PostgreSQL
+Primary dev/deploy environment.
 
-**Category:** Database
-
-Relational database for structured data storage. Used across multiple projects for application backends and data persistence.`,
-      },
-      {
-        name: "git.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Git & GitHub
-
-**Category:** Version Control & Collaboration
-
-Daily driver for all development and open-source contributions. Extensive experience with PR workflows, code review processes, and collaborative development on large repositories like Langflow.`,
-      },
-      {
-        name: "linux.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# Linux
-
-**Category:** Operating System
-
-Primary development and deployment environment. System administration, containerization, and server management.`,
-      },
-      {
-        name: "n8n.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# n8n
-
-**Category:** Workflow Automation
-
-Visual workflow automation platform for connecting services and building integration pipelines. Used for AI workflow orchestration and data processing automation.`,
+**Used In:**
+- Development and deployment environment
+- Server administration and containerization`,
+          },
+        ],
       },
     ],
   },
@@ -323,6 +358,47 @@ Visual workflow automation platform for connecting services and building integra
     name: "projects",
     type: "folder",
     children: [
+      {
+        name: "harness-evolver.md",
+        type: "file",
+        contentType: "markdown",
+        content: `# Harness Evolver
+
+**Status:** Active | **Type:** Open Source
+
+Plugin Claude Code para evolu\u00e7\u00e3o aut\u00f4noma de harnesses LLM. Inspirado no Meta-Harness (Stanford IRIS Lab, 2026). Arquitetura de tr\u00eas camadas com loop aut\u00f4nomo de proposer\u2192evaluator\u2192selector.
+
+**Stack:** Python, Claude Code, LangSmith
+
+**Links:**
+- [GitHub](https://github.com/raphaelchristi/harness-evolver)`,
+      },
+      {
+        name: "ceppem-ai.md",
+        type: "file",
+        contentType: "markdown",
+        content: `# CEPPEM AI
+
+**Status:** Production | **Company:** Sogitec
+
+Sistema multi-agente em produ\u00e7\u00e3o real, integrado com Chatwoot, rodando em GCP (ceppem-cs-prod). Agents aut\u00f4nomos que processam conversas de atendimento, classificam inten\u00e7\u00f5es, e geram respostas contextualizadas.
+
+**Stack:** LangGraph, Python, Redis, GCP, Chatwoot
+
+**Impact:** Sistema rodando em produ\u00e7\u00e3o 24/7, processando conversas reais de atendimento ao cliente.`,
+      },
+      {
+        name: "viral-post.md",
+        type: "file",
+        contentType: "markdown",
+        content: `# Viral Technical Post
+
+**Status:** Published | **Platform:** LinkedIn
+
+Post t\u00e9cnico sobre Claude Code que atingiu 100k+ impress\u00f5es, 1.600+ rea\u00e7\u00f5es, e gerou 500+ novos seguidores. Evid\u00eancia de autoridade t\u00e9cnica p\u00fablica no ecossistema Anthropic/Claude.
+
+**Impact:** 100k+ impressions | 1,600+ reactions | 500+ new followers`,
+      },
       {
         name: "styleflow.md",
         type: "file",
@@ -341,26 +417,6 @@ As the team's CRO, led conversion optimization strategy while contributing to th
 - [Read Article on IT Forum](https://itforum.com.br/inteligencia-artificial/styleflow-looks-ia-vence-langflow/)`,
       },
       {
-        name: "cafran-crm.md",
-        type: "file",
-        contentType: "markdown",
-        content: `# AI-Powered CRM/ERP System
-
-**Status:** Completed | **Company:** Cafran
-
-Full-stack CRM/ERP system with an AI-native natural language interface. Users can ask questions about clients, orders, and business data in plain language and get contextualized real-time responses — no complex training required.
-
-**Key achievements:**
-- Designed data architecture with Prisma ORM optimized for Oracle Cloud Database
-- Built complete frontend with T3 Stack (Next.js, TypeScript, tRPC, shadcn/ui)
-- Implemented MCP-based AI chat integrated with Google ecosystem
-- Developed type-safe APIs ensuring seamless frontend-backend-AI communication
-
-**Stack:** Next.js, TypeScript, tRPC, Prisma, Oracle Cloud, MCP, Google AI
-
-**Impact:** Eliminated the need for complex system training — users interact with enterprise data through natural language.`,
-      },
-      {
         name: "langflow-contrib.md",
         type: "file",
         contentType: "markdown",
@@ -368,14 +424,14 @@ Full-stack CRM/ERP system with an AI-native natural language interface. Users ca
 
 **Status:** Ongoing | **Context:** DataStax (AI/ML QA Engineer)
 
-Core contributor to Langflow, one of the most popular open-source frameworks for building LLM applications (20k+ GitHub stars). Contributed as part of the DataStax engineering team, directly impacting thousands of developers worldwide.
+Backend QA and component development on Langflow, one of the most popular open-source frameworks for building LLM applications (20k+ GitHub stars). Contributed as part of the DataStax engineering team, directly impacting thousands of developers worldwide.
 
 **Contributions include:**
 - New components: Regex Pattern Extractors, ArXiv, Git, DeepSeek Models, LLM Routers
 - xAI integration
 - Google AI, Groq, and Gemini model updates
 - YouTube Video Analysis template
-- Quality assurance and testing for platform stability
+- Backend quality assurance and testing for platform stability
 - Code review and PR development
 
 **Links:**
@@ -447,6 +503,25 @@ Quality assurance and open-source development on the Langflow platform. Contribu
 
 Built AI solutions and agent architectures in a remote-first AI research lab.`,
       },
+      {
+        name: "research.md",
+        type: "file",
+        contentType: "markdown",
+        content: `# Research Interests
+
+## Mathematics
+Undergraduate research in pure mathematics:
+- OPN (Odd Perfect Numbers) — number theory
+- TSPD (Traveling Salesman Problem with Drone) — combinatorial optimization
+- Geometrog\u00eanese — geometric structures from axiomatic systems
+
+## AI & Multi-Agent Systems
+Current research focus:
+- Autonomous evolution of LLM evaluation harnesses
+- Multi-agent orchestration patterns for production systems
+- Agent observability and evaluation pipelines
+- Sandbox architectures for secure agent execution`,
+      },
     ],
   },
   {
@@ -460,7 +535,7 @@ Built AI solutions and agent architectures in a remote-first AI research lab.`,
         content: JSON.stringify(
           {
             name: "Raphael Valdetaro",
-            role: "AI Engineer & AI Architect",
+            role: "AI Engineer \u00b7 Multi-Agent Systems",
             email: "raphaelvaldetaro@gmail.com",
             linkedin: "https://www.linkedin.com/in/raphael-valdetaro/",
             github: "https://github.com/raphaelchristi",

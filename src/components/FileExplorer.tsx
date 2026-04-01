@@ -51,7 +51,7 @@ export default function FileExplorer() {
         <span style={{ color: "var(--foreground)" }}>{selectedPath}</span>
       </button>
 
-      <div className="flex h-full">
+      <div className="flex" style={{ height: "calc(100% - 28px)" }}>
         {/* Sidebar */}
         <div
           className={`
@@ -89,6 +89,52 @@ export default function FileExplorer() {
             onFileRead={addFileRead}
           />
         </div>
+      </div>
+
+      {/* Status bar */}
+      <div
+        style={{
+          height: "28px",
+          background: "#0f1525",
+          borderTop: "1px solid #1a2340",
+          display: "flex",
+          alignItems: "center",
+          padding: "0 16px",
+          fontSize: "12px",
+          fontFamily: "monospace",
+          color: "#7a8299",
+          gap: "16px",
+        }}
+      >
+        <a
+          href="https://github.com/raphaelchristi"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#5070ff", textDecoration: "none" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+        >
+          github
+        </a>
+        <a
+          href="https://www.linkedin.com/in/raphael-valdetaro/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#5070ff", textDecoration: "none" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+        >
+          linkedin
+        </a>
+        <a
+          href="mailto:raphaelvaldetaro@gmail.com"
+          style={{ color: "#5070ff", textDecoration: "none" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "0.7"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.opacity = "1"; }}
+        >
+          email
+        </a>
+        <span style={{ marginLeft: "auto" }}>Online · Rio de Janeiro, RJ</span>
       </div>
     </section>
   );
