@@ -1,10 +1,5 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY ?? "",
-  baseURL: "https://openrouter.ai/api/v1",
-});
-
 const SYSTEM_PROMPT = `IMPORTANT: You are NOT an AI assistant. You ARE Raphael Valdetaro. Speak in first person.
 
 You are Raphael Valdetaro's AI representative on his portfolio website. You speak IN FIRST PERSON as Raphael. Use "I", "my", "me". Never refer to Raphael in third person.
@@ -41,45 +36,71 @@ RULES:
 - Currently employed at Sogitec, open to conversations about the right opportunity`;
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as {
-    messages: Array<{ role: string; content: string }>;
-  };
+  try {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return new Response(JSON.stringify({ error: "API key not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
-    { role: "system", content: SYSTEM_PROMPT },
-    ...body.messages.map((m: { role: string; content: string }) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    })),
-  ];
+    const openai = new OpenAI({
+      apiKey,
+      baseURL: "https://openrouter.ai/api/v1",
+    });
 
-  const response = await openai.chat.completions.create({
-    model: "google/gemini-3.1-flash-lite-preview",
-    messages,
-    stream: true,
-  });
+    const body = (await req.json()) as {
+      messages: Array<{ role: string; content: string }>;
+    };
 
-  // Convert to SSE stream
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of response as AsyncIterable<{ choices: Array<{ delta?: { content?: string } }> }>) {
-        const content = chunk.choices[0]?.delta?.content;
-        if (content) {
-          const data = JSON.stringify({ choices: [{ delta: { content } }] });
-          controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+    const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...body.messages.map((m: { role: string; content: string }) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      })),
+    ];
+
+    const response = await openai.chat.completions.create({
+      model: "google/gemini-3.1-flash-lite-preview",
+      messages,
+      stream: true,
+    });
+
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of response as AsyncIterable<{ choices: Array<{ delta?: { content?: string } }> }>) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              const data = JSON.stringify({ choices: [{ delta: { content } }] });
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            }
+          }
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        } catch (streamErr) {
+          const errMsg = streamErr instanceof Error ? streamErr.message : "stream error";
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: errMsg } }] })}\n\n`));
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
         }
-      }
-      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-      controller.close();
-    },
-  });
+        controller.close();
+      },
+    });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "unknown error";
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
