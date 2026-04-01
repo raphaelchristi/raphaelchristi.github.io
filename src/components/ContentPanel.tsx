@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion } from "motion/react";
 import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
 import TerminalRenderer from "./TerminalRenderer";
@@ -22,7 +21,6 @@ function AnimatedPlaceholder({ visible }: { visible: boolean }) {
   useEffect(() => {
     if (!visible) return;
     const hint = PLACEHOLDER_HINTS[hintIndex] ?? "";
-
     if (!deleting && charIndex < hint.length) {
       const timeout = setTimeout(() => setCharIndex((c) => c + 1), 40);
       return () => clearTimeout(timeout);
@@ -46,8 +44,14 @@ function AnimatedPlaceholder({ visible }: { visible: boolean }) {
   const hint = PLACEHOLDER_HINTS[hintIndex] ?? "";
   return (
     <span
-      className="absolute pointer-events-none font-mono text-[13px] select-none"
-      style={{ color: "#3a4560", left: 0, top: 0 }}
+      className="absolute pointer-events-none select-none"
+      style={{
+        color: "#999999",
+        left: 0,
+        top: 0,
+        fontFamily: '"Courier New", monospace',
+        fontSize: "12px",
+      }}
     >
       {hint.slice(0, charIndex)}
     </span>
@@ -56,11 +60,7 @@ function AnimatedPlaceholder({ visible }: { visible: boolean }) {
 
 function RoutingStatus({ agentName, done }: { agentName: string; done: boolean }) {
   const [phase, setPhase] = useState(0);
-  const phases = [
-    "routing query...",
-    `→ ${agentName}`,
-    "loading skills...",
-  ];
+  const phases = ["routing query...", `→ ${agentName}`, "loading skills..."];
 
   useEffect(() => {
     if (phase < phases.length - 1) {
@@ -69,17 +69,26 @@ function RoutingStatus({ agentName, done }: { agentName: string; done: boolean }
     }
   }, [phase, phases.length]);
 
-  // Hide completely once response is done
   if (done) return null;
 
   return (
-    <div className="mb-2 font-mono text-[12px] flex items-center gap-2" style={{ color: "#4a5568" }}>
-      <span className="animate-pulse" style={{ color: "#5070ff" }}>●</span>
+    <div
+      style={{
+        marginBottom: "6px",
+        fontFamily: '"Courier New", monospace',
+        fontSize: "12px",
+        color: "#666666",
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+      }}
+    >
+      <span style={{ color: "#008000" }}>●</span>
       <span>
         {phase === 1 ? (
           <>
-            <span style={{ color: "#4a5568" }}>→ </span>
-            <span style={{ color: "#5070ff", fontWeight: "bold" }}>{agentName}</span>
+            <span style={{ color: "#444444" }}>→ </span>
+            <span style={{ color: "#000080", fontWeight: "bold" }}>{agentName}</span>
           </>
         ) : (
           phases[phase]
@@ -100,47 +109,78 @@ type Props = {
   onFileRead: (path: string, content: string) => void;
 };
 
-function TerminalTitleBar() {
+function ContentTabBar({ selectedPath }: { selectedPath: string }) {
   return (
     <div
-      className="flex items-center h-10 px-4 shrink-0 rounded-t-lg"
       style={{
-        backgroundColor: "#111827",
-        borderBottom: "1px solid #1a2340",
+        backgroundColor: "var(--window-bg)",
+        borderBottom: "1px solid var(--window-border-dark)",
+        display: "flex",
+        alignItems: "flex-end",
+        paddingLeft: "4px",
+        paddingTop: "2px",
+        height: "22px",
+        gap: "2px",
       }}
+      role="tablist"
     >
-      <div className="flex items-center gap-2">
-        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#ff5f57" }} />
-        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#febc2e" }} />
-        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#28c840" }} />
-      </div>
-      <span
-        className="flex-1 text-center text-[13px] font-mono"
-        style={{ color: "#7a8299" }}
+      {/* Agent chat tab */}
+      <div
+        role="tab"
+        aria-selected="true"
+        style={{
+          backgroundColor: "#ffffff",
+          borderStyle: "solid",
+          borderWidth: "1px",
+          borderColor: "var(--window-border-dark) var(--window-border-dark) #ffffff var(--window-border-dark)",
+          padding: "1px 10px",
+          fontFamily: '"Tahoma", sans-serif',
+          fontSize: "11px",
+          color: "#000000",
+          cursor: "default",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+          marginBottom: "-1px",
+          userSelect: "none",
+        }}
       >
-        raphael.agent — bash
-      </span>
-      <div className="w-[52px]" />
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="14" height="10" rx="0" fill="#000080" />
+          <rect x="2" y="2" width="12" height="8" fill="#0000cc" />
+          <rect x="3" y="4" width="2" height="1" fill="#ffffff" />
+          <rect x="6" y="4" width="2" height="1" fill="#ffffff" />
+          <rect x="9" y="4" width="2" height="1" fill="#ffffff" />
+          <rect x="1" y="11" width="14" height="4" fill="#d4d0c8" />
+        </svg>
+        {selectedPath
+          ? selectedPath.split("/").pop()
+          : "raphael.agent"}
+      </div>
     </div>
   );
 }
 
 function MessageBlock({ msg, nextMsg }: { msg: ChatMessage; nextMsg?: ChatMessage }) {
   if (msg.role === "file") {
-    // Extract header line (▶ reading ...) and content
     const lines = msg.content.split("\n");
     const headerLine = lines[0] ?? "";
-    const separator = lines[1] ?? "";
     const fileContent = lines.slice(2).join("\n");
     const isJson = headerLine.includes(".json");
 
     return (
-      <div className="mb-3">
-        <div className="font-mono text-[13px] mb-1" style={{ color: "#7a8299" }}>
+      <div style={{ marginBottom: "8px" }}>
+        <div
+          style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: "11px",
+            color: "#444444",
+            marginBottom: "4px",
+            borderBottom: "1px solid #d4d0c8",
+            paddingBottom: "2px",
+          }}
+        >
           {headerLine}
-        </div>
-        <div className="font-mono text-[13px] mb-2" style={{ color: "#1a2340" }}>
-          {separator}
         </div>
         <TerminalRenderer
           content={fileContent}
@@ -152,8 +192,19 @@ function MessageBlock({ msg, nextMsg }: { msg: ChatMessage; nextMsg?: ChatMessag
 
   if (msg.role === "system") {
     return (
-      <div className="mb-3">
-        <pre className="font-mono text-[13px] whitespace-pre-wrap" style={{ color: "#c0c8e0" }}>
+      <div style={{ marginBottom: "8px" }}>
+        <pre
+          style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: "12px",
+            whiteSpace: "pre-wrap",
+            color: "#000080",
+            margin: 0,
+            padding: "4px 6px",
+            backgroundColor: "#f0f0f8",
+            borderLeft: "3px solid #000080",
+          }}
+        >
           {msg.content}
         </pre>
       </div>
@@ -161,30 +212,51 @@ function MessageBlock({ msg, nextMsg }: { msg: ChatMessage; nextMsg?: ChatMessag
   }
 
   if (msg.role === "routing") {
-    const responseDone = nextMsg?.role === "assistant" && nextMsg.content.length > 0;
+    const responseDone =
+      nextMsg?.role === "assistant" && nextMsg.content.length > 0;
     return <RoutingStatus agentName={msg.content} done={responseDone} />;
   }
 
   if (msg.role === "user") {
     return (
-      <div className="mb-1">
-        <span className="font-mono text-[13px]"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
-        <span className="font-mono text-[13px]" style={{ color: "#e0e4ef" }}>{msg.content}</span>
+      <div style={{ marginBottom: "4px" }}>
+        <span
+          style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: "12px",
+          }}
+        >
+          <span style={{ color: "#000080", fontWeight: "bold" }}>C:\raphael\agent{">"}</span>
+          <span style={{ color: "#000000" }}> {msg.content}</span>
+        </span>
       </div>
     );
   }
 
-  // Assistant response — filter Hermes skill headers, render as markdown
+  // Assistant
   const cleanContent = msg.content
     .split("\n")
-    .filter((line) => !(/^`?📚/.test(line.trim()) || /^`?📦/.test(line.trim()) || /^`?🔧/.test(line.trim())))
+    .filter(
+      (line) =>
+        !(/^`?📚/.test(line.trim()) ||
+          /^`?📦/.test(line.trim()) ||
+          /^`?🔧/.test(line.trim()))
+    )
     .join("\n")
     .trim();
 
   return (
-    <div className="mb-3">
+    <div style={{ marginBottom: "8px", paddingLeft: "8px" }}>
       {msg.content === "" ? (
-        <span className="animate-pulse font-mono text-[13px]" style={{ color: "#e0e4ef" }}>▊</span>
+        <span
+          style={{
+            fontFamily: '"Courier New", monospace',
+            fontSize: "12px",
+            color: "#000000",
+          }}
+        >
+          _
+        </span>
       ) : cleanContent ? (
         <TerminalRenderer content={cleanContent} contentType="markdown" />
       ) : null}
@@ -213,12 +285,10 @@ export default function ContentPanel({
     }
   }, [messages, inputValue]);
 
-  // Focus input on click anywhere in terminal
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
 
-  // When a file is selected, add it to conversation
   useEffect(() => {
     if (selectedFile && selectedPath && selectedPath !== lastFileRef.current) {
       lastFileRef.current = selectedPath;
@@ -244,54 +314,96 @@ export default function ContentPanel({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <TerminalTitleBar />
+    <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      <ContentTabBar selectedPath={selectedPath} />
 
+      {/* Content area: inset Win2000 style */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-auto p-4 md:p-5 cursor-text"
-        style={{ backgroundColor: "#0a0e1a" }}
+        className="win-inset"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          backgroundColor: "#ffffff",
+          padding: "8px 12px",
+          cursor: "text",
+          margin: "4px",
+        }}
         onClick={focusInput}
+        role="region"
+        aria-label="Agent chat terminal"
+        aria-live="polite"
       >
         {/* Welcome block */}
         {hasCheckedHealth && messages.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-4"
-          >
-            <div className="font-mono text-[13px] mb-2" style={{ color: "#c0c8e0" }}>
-              {chatEnabled
-                ? "Welcome to raphael.agent — an AI that knows my work."
-                : "Agent offline — browse files in the sidebar to learn about me."}
+          <div style={{ marginBottom: "12px" }}>
+            {/* Win2000 info box */}
+            <div
+              className="win-raised"
+              style={{
+                backgroundColor: "#fffde7",
+                padding: "8px 10px",
+                marginBottom: "8px",
+                display: "flex",
+                gap: "8px",
+                alignItems: "flex-start",
+              }}
+              role="status"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: "1px" }}>
+                <circle cx="8" cy="8" r="7" fill="#ffcc00" stroke="#cc9900" strokeWidth="1" />
+                <rect x="7" y="4" width="2" height="4" fill="#000000" />
+                <rect x="7" y="10" width="2" height="2" fill="#000000" />
+              </svg>
+              <div>
+                <p
+                  style={{
+                    fontFamily: '"Tahoma", sans-serif',
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                    color: "#000080",
+                    marginBottom: "2px",
+                  }}
+                >
+                  {chatEnabled
+                    ? "Welcome to raphael.agent"
+                    : "Agent offline"}
+                </p>
+                <p
+                  style={{
+                    fontFamily: '"Tahoma", sans-serif',
+                    fontSize: "11px",
+                    color: "#000000",
+                  }}
+                >
+                  {chatEnabled
+                    ? "An AI that knows my work. Type below or click a quick action."
+                    : "Browse files in the left panel to learn about me."}
+                </p>
+              </div>
             </div>
+
             {chatEnabled && (
-              <>
-                <div className="font-mono text-[12px] mb-3" style={{ color: "#7a8299" }}>
-                  Ask me anything below, or type <span style={{ color: "#5070ff" }}>help</span> for commands.
-                </div>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {["about me", "my projects", "my skills", "contact"].map((label) => (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                {["about me", "my projects", "my skills", "contact"].map(
+                  (label) => (
                     <button
                       key={label}
                       onClick={(e) => {
                         e.stopPropagation();
                         onSendMessage(label);
                       }}
-                      className="font-mono text-[12px] px-3 py-1 rounded border transition-all hover:opacity-80"
-                      style={{
-                        color: "#5070ff",
-                        borderColor: "#1a2340",
-                        backgroundColor: "#0f1525",
-                      }}
+                      className="win-button"
+                      style={{ minWidth: "auto" }}
+                      aria-label={`Ask about ${label}`}
                     >
                       {label}
                     </button>
-                  ))}
-                </div>
-              </>
+                  )
+                )}
+              </div>
             )}
-          </motion.div>
+          </div>
         )}
 
         {/* Messages */}
@@ -301,10 +413,27 @@ export default function ContentPanel({
 
         {/* Inline prompt */}
         {!isLoading && (
-          <div className="flex items-start font-mono text-[13px]">
-            <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
-            <span className="relative flex-1 min-w-[1px]">
-              <AnimatedPlaceholder visible={inputValue.length === 0 && messages.length === 0} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              fontFamily: '"Courier New", monospace',
+              fontSize: "12px",
+            }}
+          >
+            <span
+              style={{
+                flexShrink: 0,
+                color: "#000080",
+                fontWeight: "bold",
+              }}
+            >
+              C:\raphael\agent{">"}
+            </span>
+            <span className="relative flex-1 min-w-[1px]" style={{ marginLeft: "4px" }}>
+              <AnimatedPlaceholder
+                visible={inputValue.length === 0 && messages.length === 0}
+              />
               <span
                 ref={inputRef}
                 contentEditable
@@ -313,20 +442,26 @@ export default function ContentPanel({
                 onInput={handleInput}
                 className="outline-none inline-block min-w-[1px]"
                 style={{
-                  color: "#e0e4ef",
-                  caretColor: "transparent",
+                  color: "#000000",
+                  caretColor: "#000000",
+                  fontFamily: '"Courier New", monospace',
+                  fontSize: "12px",
                 }}
                 spellCheck={false}
+                aria-label="Enter your message"
+                role="textbox"
               />
             </span>
             <span
-              className="animate-pulse inline-block"
               style={{
+                display: "inline-block",
                 width: "8px",
-                height: "16px",
-                backgroundColor: "#e0e4ef",
+                height: "14px",
+                backgroundColor: "#000000",
                 marginLeft: "1px",
+                animation: "pulse 1s step-end infinite",
               }}
+              aria-hidden="true"
             />
           </div>
         )}

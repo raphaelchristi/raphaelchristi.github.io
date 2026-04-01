@@ -39,7 +39,7 @@ function parseLinks(line: string): React.ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#5070ff" }}
+          style={{ color: "#000080" }}
         >
           {earliest.match[1]}
         </a>,
@@ -53,7 +53,7 @@ function parseLinks(line: string): React.ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#5070ff" }}
+          style={{ color: "#000080" }}
         >
           {earliest.match[0]}
         </a>,
@@ -97,19 +97,19 @@ function parseBold(text: string): React.ReactNode {
 
     if (earliest.type === "bold") {
       parts.push(
-        <span key={key++} className="font-bold" style={{ color: "#e0e4ef" }}>
+        <span key={key++} className="font-bold" style={{ color: "#000000" }}>
           {earliest.match[1]}
         </span>,
       );
     } else if (earliest.type === "italic") {
       parts.push(
-        <span key={key++} className="font-semibold" style={{ color: "#c0c8e0" }}>
+        <span key={key++} className="italic" style={{ color: "#000000" }}>
           {earliest.match[1]}
         </span>,
       );
     } else if (earliest.type === "code") {
       parts.push(
-        <span key={key++} className="px-1 py-0.5 rounded text-[12px]" style={{ backgroundColor: "#1a2340", color: "#a5b4fc" }}>
+        <span key={key++} className="px-1 py-0.5 text-[11px]" style={{ backgroundColor: "#e8e8e8", color: "#000080", border: "1px solid #aaaaaa", fontFamily: '"Courier New", monospace' }}>
           {earliest.match[1]}
         </span>,
       );
@@ -121,7 +121,7 @@ function parseBold(text: string): React.ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#5070ff" }}
+          style={{ color: "#000080" }}
         >
           {earliest.match[1]}
         </a>,
@@ -141,21 +141,21 @@ function renderMarkdownAsTerminal(content: string): React.ReactNode {
     // Headings → remove # prefix, render bold with size
     if (processed.startsWith("# ")) {
       return (
-        <div key={i} className="mt-3 first:mt-0 mb-2 font-bold text-[18px]" style={{ color: "#e0e4ef" }}>
+        <div key={i} className="mt-3 first:mt-0 mb-2 font-bold text-[14px]" style={{ color: "#000080" }}>
           {parseBold(processed.slice(2))}
         </div>
       );
     }
     if (processed.startsWith("## ")) {
       return (
-        <div key={i} className="mt-4 mb-2 font-bold text-[15px]" style={{ color: "#c0c8e0" }}>
+        <div key={i} className="mt-4 mb-2 font-bold text-[13px]" style={{ color: "#000080" }}>
           {parseBold(processed.slice(3))}
         </div>
       );
     }
     if (processed.startsWith("### ")) {
       return (
-        <div key={i} className="mt-3 mb-1 font-semibold text-[14px]" style={{ color: "#b0b8d0" }}>
+        <div key={i} className="mt-3 mb-1 font-semibold text-[12px]" style={{ color: "#000000" }}>
           {parseBold(processed.slice(4))}
         </div>
       );
@@ -165,7 +165,7 @@ function renderMarkdownAsTerminal(content: string): React.ReactNode {
     if (processed.startsWith("- ") || processed.startsWith("* ")) {
       return (
         <div key={i}>
-          <span style={{ color: "#5070ff" }}>  ▸ </span>
+          <span style={{ color: "#000080" }}>  ▸ </span>
           {parseBold(processed.slice(2))}
         </div>
       );
@@ -176,7 +176,7 @@ function renderMarkdownAsTerminal(content: string): React.ReactNode {
     if (indentMatch) {
       return (
         <div key={i}>
-          <span style={{ color: "#5070ff" }}>    ▸ </span>
+          <span style={{ color: "#000080" }}>    ▸ </span>
           {parseBold(indentMatch[2] ?? "")}
         </div>
       );
@@ -204,7 +204,7 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
 
   return (
     <>
-      <span style={{ color: "#7a8299" }}>{"{"}</span>
+      <span style={{ color: "#444444" }}>{"{"}</span>
       {"\n"}
       {entries.map(([key, value], idx) => {
         const strValue = String(value);
@@ -214,15 +214,15 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
         return (
           <span key={key}>
             {"  "}
-            <span style={{ color: "#5070ff" }}>&quot;{key}&quot;</span>
-            <span style={{ color: "#7a8299" }}>: </span>
+            <span style={{ color: "#000080" }}>&quot;{key}&quot;</span>
+            <span style={{ color: "#444444" }}>: </span>
             {isUrl ? (
               <a
                 href={strValue}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:opacity-80"
-                style={{ color: "#a5b4fc" }}
+                style={{ color: "#000080" }}
               >
                 &quot;{strValue}&quot;
               </a>
@@ -230,21 +230,21 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
               <a
                 href={`mailto:${strValue}`}
                 className="underline underline-offset-2 hover:opacity-80"
-                style={{ color: "#a5b4fc" }}
+                style={{ color: "#000080" }}
               >
                 &quot;{strValue}&quot;
               </a>
             ) : (
-              <span style={{ color: "#a5b4fc" }}>
+              <span style={{ color: "#008000" }}>
                 &quot;{strValue}&quot;
               </span>
             )}
-            {idx < entries.length - 1 && <span style={{ color: "#7a8299" }}>,</span>}
+            {idx < entries.length - 1 && <span style={{ color: "#444444" }}>,</span>}
             {"\n"}
           </span>
         );
       })}
-      <span style={{ color: "#7a8299" }}>{"}"}</span>
+      <span style={{ color: "#444444" }}>{"}"}</span>
     </>
   );
 }
@@ -258,10 +258,10 @@ export default function TerminalRenderer({
 }) {
   return (
     <pre
-      className="font-mono text-[14px] md:text-[15px] leading-relaxed whitespace-pre-wrap break-words"
+      className="font-mono text-[12px] leading-relaxed whitespace-pre-wrap break-words"
       style={{
-        color: "#c0c8e0",
-        textShadow: "0 0 8px rgba(80, 112, 255, 0.1)",
+        color: "#000000",
+        fontFamily: '"Courier New", monospace',
       }}
     >
       {contentType === "json"
