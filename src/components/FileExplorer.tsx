@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { agentFileTree } from "@/data/agent-files";
 import type { AgentFile } from "@/data/agent-files";
+import { useAgentChat } from "@/hooks/useAgentChat";
 import FileTree from "./FileTree";
 import ContentPanel from "./ContentPanel";
 
@@ -12,10 +13,19 @@ export default function FileExplorer() {
   const [selectedFile, setSelectedFile] = useState<AgentFile>(defaultFile);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const {
+    messages,
+    isLoading,
+    hasCheckedHealth,
+    sendMessage,
+    addFileRead,
+    chatEnabled,
+  } = useAgentChat();
+
   const handleSelect = (path: string, file: AgentFile) => {
     setSelectedPath(path);
     setSelectedFile(file);
-    setSidebarOpen(false); // close on mobile
+    setSidebarOpen(false);
   };
 
   return (
@@ -43,7 +53,7 @@ export default function FileExplorer() {
       </button>
 
       <div className="flex h-full">
-        {/* Sidebar - desktop always visible, mobile toggled */}
+        {/* Sidebar */}
         <div
           className={`
             ${sidebarOpen ? "block" : "hidden"} md:block
@@ -64,7 +74,7 @@ export default function FileExplorer() {
           />
         </div>
 
-        {/* Content panel */}
+        {/* Content panel with chat */}
         <div
           className="flex-1 flex flex-col min-h-0"
           style={{ backgroundColor: "var(--background)" }}
@@ -72,6 +82,12 @@ export default function FileExplorer() {
           <ContentPanel
             selectedFile={selectedFile}
             selectedPath={selectedPath}
+            messages={messages}
+            isLoading={isLoading}
+            hasCheckedHealth={hasCheckedHealth}
+            chatEnabled={chatEnabled}
+            onSendMessage={sendMessage}
+            onFileRead={addFileRead}
           />
         </div>
       </div>
