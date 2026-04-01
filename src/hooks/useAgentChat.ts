@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
 import { agentFileTree, flattenFiles } from "@/data/agent-files";
 import type { AgentFile } from "@/data/agent-files";
 
@@ -9,6 +10,8 @@ export type ChatMessage = {
   role: "user" | "assistant" | "file" | "routing" | "system";
   content: string;
 };
+
+// === Local commands (ls, cd, cat, etc.) ===
 
 function resolveDir(tree: AgentFile[], cwd: string): AgentFile[] | null {
   if (cwd === "/" || cwd === "") return tree;
@@ -38,20 +41,7 @@ function handleLocalCommand(
   const arg = parts.slice(1).join(" ");
 
   if (cmd === "help") {
-    return {
-      handled: true,
-      output: `Available commands:
-  ls          List files in current directory
-  cd <dir>    Change directory (cd .., cd skills/core)
-  pwd         Print working directory
-  cat <file>  Read a file
-  tree        Show full file tree
-  clear       Clear terminal
-  whoami      Who am I?
-  help        Show this help
-
-Anything else is sent to the AI agent.`,
-    };
+    return { handled: true, output: `Available commands:\n  ls, cd, pwd, cat, tree, clear, whoami, help\n\nAnything else is sent to the AI agent.` };
   }
   if (cmd === "clear") return { handled: true, output: "__CLEAR__" };
   if (cmd === "whoami") return { handled: true, output: "raphael" };
@@ -84,14 +74,15 @@ Anything else is sent to the AI agent.`,
     const allFiles = flattenFiles(agentFileTree);
     const treeStr = allFiles.map((f) => {
       const depth = f.path.split("/").length - 1;
-      const indent = "  ".repeat(depth);
-      return `${indent}${f.file.type === "folder" ? "📂" : "📄"} ${f.file.name}`;
+      return `${"  ".repeat(depth)}${f.file.type === "folder" ? "📂" : "📄"} ${f.file.name}`;
     }).join("\n");
     return { handled: true, output: `raphael.agent/\n${treeStr}` };
   }
 
   return { handled: false };
 }
+
+// === Intent classification ===
 
 function classifyIntent(msg: string): { agent: string } {
   const lower = msg.toLowerCase();
@@ -100,17 +91,62 @@ function classifyIntent(msg: string): { agent: string } {
   return { agent: "Portfolio Agent" };
 }
 
-export function useAgentChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cwd, setCwd] = useState("");
+// === Main hook ===
 
+export function useAgentChat() {
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  const [cwd, setCwd] = useState("");
+  const lastAgentMsgCount = useRef(0);
+
+  // CopilotKit v2 hooks
+  const { agent } = useAgent();
+  const { copilotkit } = useCopilotKit();
+
+  const isLoading = agent.isRunning;
+
+  // Sync CopilotKit agent messages → local messages
+  useEffect(() => {
+    const agentMessages = agent.messages;
+    if (agentMessages.length <= lastAgentMsgCount.current) return;
+
+    // Process new messages from CopilotKit
+    const newMessages = agentMessages.slice(lastAgentMsgCount.current);
+    lastAgentMsgCount.current = agentMessages.length;
+
+    for (const msg of newMessages) {
+      if (msg.role === "assistant" && msg.content) {
+        const content = typeof msg.content === "string" ? msg.content : "";
+        // Clean Hermes skill headers
+        const cleanContent = content
+          .split("\n")
+          .filter((line: string) => !(/^`?📚/.test(line.trim()) || /^`?📦/.test(line.trim())))
+          .join("\n")
+          .trim();
+
+        if (cleanContent) {
+          setLocalMessages((prev) => {
+            // Update existing or add new
+            const existing = prev.findIndex((m) => m.id === `copilot-${msg.id}`);
+            if (existing >= 0) {
+              const updated = [...prev];
+              updated[existing] = { ...updated[existing]!, content: cleanContent };
+              return updated;
+            }
+            return [...prev, { id: `copilot-${msg.id}`, role: "assistant", content: cleanContent }];
+          });
+        }
+      }
+    }
+  }, [agent.messages]);
+
+  // Add a file read
   const addFileRead = useCallback((path: string, content: string) => {
-    setMessages([
+    setLocalMessages([
       { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${path}...\n─────────────────────────────\n${content}` },
     ]);
   }, []);
 
+  // Send message
   const sendMessage = useCallback(
     async (userMessage: string) => {
       const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: userMessage };
@@ -118,89 +154,48 @@ export function useAgentChat() {
       // Local commands
       const localResult = handleLocalCommand(userMessage, cwd, setCwd);
       if (localResult.handled) {
-        if (localResult.output === "__CLEAR__") { setMessages([]); return; }
+        if (localResult.output === "__CLEAR__") { setLocalMessages([]); lastAgentMsgCount.current = 0; return; }
         if (localResult.fileRead) {
-          setMessages((prev) => [...prev, userMsg, { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${localResult.fileRead!.path}...\n─────────────────────────────\n${localResult.fileRead!.content}` }]);
+          setLocalMessages((prev) => [...prev, userMsg, { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${localResult.fileRead!.path}...\n─────────────────────────────\n${localResult.fileRead!.content}` }]);
           return;
         }
-        setMessages((prev) => [...prev, userMsg, { id: `system-${Date.now()}`, role: "system", content: localResult.output ?? "" }]);
+        setLocalMessages((prev) => [...prev, userMsg, { id: `system-${Date.now()}`, role: "system", content: localResult.output ?? "" }]);
         return;
       }
 
-      // Agent chat via /api/chat (Vercel serverless → OpenRouter)
+      // Agent chat via CopilotKit
       const intent = classifyIntent(userMessage);
       const routingMsg: ChatMessage = { id: `routing-${Date.now()}`, role: "routing", content: intent.agent };
-      const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: "assistant", content: "" };
 
-      setMessages((prev) => [...prev, userMsg, routingMsg, assistantMsg]);
-      setIsLoading(true);
-
-      // Build conversation history (only user/assistant)
-      const apiMessages = messages
-        .filter((m) => m.role === "user" || m.role === "assistant")
-        .map((m) => ({ role: m.role, content: m.content }));
-      apiMessages.push({ role: "user", content: userMessage });
+      setLocalMessages((prev) => [...prev, userMsg, routingMsg]);
 
       try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: apiMessages }),
+        // Add user message to CopilotKit agent
+        agent.addMessage({
+          id: crypto.randomUUID(),
+          role: "user",
+          content: userMessage,
         });
 
-        if (!res.ok) throw new Error(`API error: ${res.status}`);
-
-        const reader = res.body?.getReader();
-        if (!reader) throw new Error("No response body");
-
-        const decoder = new TextDecoder();
-        let buffer = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split("\n");
-          buffer = lines.pop() ?? "";
-
-          for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed.startsWith("data: ")) continue;
-            const data = trimmed.slice(6);
-            if (data === "[DONE]") break;
-
-            try {
-              const parsed = JSON.parse(data) as { choices?: Array<{ delta?: { content?: string } }> };
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                setMessages((prev) => {
-                  const updated = [...prev];
-                  const last = updated[updated.length - 1];
-                  if (last?.role === "assistant") {
-                    updated[updated.length - 1] = { ...last, content: last.content + content };
-                  }
-                  return updated;
-                });
-              }
-            } catch { /* skip */ }
-          }
-        }
+        // Run the agent
+        await copilotkit.runAgent({ agent });
       } catch {
-        setMessages((prev) => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last?.role === "assistant" && last.content === "") {
-            updated[updated.length - 1] = { ...last, content: "connection error. try again." };
-          }
-          return updated;
-        });
-      } finally {
-        setIsLoading(false);
+        setLocalMessages((prev) => [
+          ...prev,
+          { id: `system-${Date.now()}`, role: "system", content: "connection error. try again." },
+        ]);
       }
     },
-    [cwd, messages],
+    [cwd, agent, copilotkit],
   );
 
-  return { messages, isOnline: true, isLoading, hasCheckedHealth: true, sendMessage, addFileRead, chatEnabled: true };
+  return {
+    messages: localMessages,
+    isOnline: true,
+    isLoading,
+    hasCheckedHealth: true,
+    sendMessage,
+    addFileRead,
+    chatEnabled: true,
+  };
 }
