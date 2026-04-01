@@ -4,6 +4,15 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { countByFolder } from "@/data/agent-files";
 
+const ASCII_ART = [
+  "██████╗  █████╗ ██████╗ ██╗  ██╗ █████╗ ███████╗██╗          █████╗  ██████╗ ███████╗███╗   ██╗████████╗",
+  "██╔══██╗██╔══██╗██╔══██╗██║  ██║██╔══██╗██╔════╝██║         ██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝",
+  "██████╔╝███████║██████╔╝███████║███████║█████╗  ██║         ███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ",
+  "██╔══██╗██╔══██║██╔═══╝ ██╔══██║██╔══██║██╔══╝  ██║         ██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ",
+  "██║  ██║██║  ██║██║     ██║  ██║██║  ██║███████╗███████╗    ██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ",
+  "╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ",
+].join("\n");
+
 function TypingLine({ text, delay }: { text: string; delay: number }) {
   const [displayed, setDisplayed] = useState("");
   const [started, setStarted] = useState(false);
@@ -42,75 +51,66 @@ export default function HeroSection() {
   return (
     <section className="w-full py-20 md:py-32 text-center overflow-hidden">
       <div className="container mx-auto px-4">
-        {/* Pixel title - Hermes style */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+        {/* ASCII art title - exact Hermes Agent style */}
+        <motion.pre
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.85 }}
           transition={{ duration: 0.8 }}
+          aria-hidden="true"
+          className="mb-7 overflow-x-auto"
+          style={{
+            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontVariantLigatures: "none",
+            fontSize: "clamp(4px, 0.95vw, 11px)",
+            lineHeight: 1.15,
+            color: "#5070FF",
+            textShadow: "0 0 20px rgba(48, 80, 255, 0.3)",
+            whiteSpace: "pre",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.85"; }}
         >
-          <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight tracking-wide"
-            style={{
-              fontFamily: "var(--font-pixel), monospace",
-              background: "linear-gradient(135deg, #6366f1 0%, #818cf8 40%, #a5b4fc 70%, #6366f1 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              filter: "drop-shadow(0 0 30px rgba(99, 102, 241, 0.4)) drop-shadow(0 0 60px rgba(99, 102, 241, 0.2))",
-            }}
-          >
-            RAPHAEL
-            <br />
-            <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
-              .AGENT
-            </span>
-          </h1>
-        </motion.div>
+          {ASCII_ART}
+        </motion.pre>
 
-        {/* Subtitle */}
+        {/* Subtitle - Hermes style */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="mt-8"
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="mt-6"
         >
-          <p
-            className="text-2xl sm:text-3xl md:text-4xl font-bold"
-            style={{ color: "var(--foreground)" }}
-          >
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: "var(--foreground)" }}>
             Research Engineer &
-          </p>
-          <p
+          </h1>
+          <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold"
-            style={{
-              background: "linear-gradient(135deg, #6366f1, #818cf8)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
+            style={{ color: "#5070FF" }}
           >
             LLM Developer.
-          </p>
+          </h1>
         </motion.div>
 
         {/* Status line */}
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-8 font-mono text-sm md:text-base space-y-1"
           style={{ color: "var(--muted)" }}
         >
           <p>
             <span>{">"} </span>
-            <TypingLine
-              text={`Status: `}
-              delay={1200}
-            />
+            <TypingLine text="Status: " delay={1000} />
             <span style={{ color: "var(--accent)" }}>
-              <TypingLine text="online" delay={1600} />
+              <TypingLine text="online" delay={1400} />
             </span>
             <TypingLine
               text={` | Skills: ${skillsCount} | Tools: ${toolsCount} | Projects: ${projectsCount}`}
-              delay={2000}
+              delay={1800}
             />
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
