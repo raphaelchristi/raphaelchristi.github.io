@@ -67,6 +67,34 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
     );
   }
 
+  if (msg.role === "routing") {
+    const lines = msg.content.split("\n");
+    return (
+      <div className="mb-2 font-mono text-[12px] leading-relaxed pl-1 border-l-2" style={{ borderColor: "#1a2340", paddingLeft: "8px" }}>
+        {lines.map((line, i) => {
+          if (line.startsWith("[route")) {
+            const match = /\[route → (.+?)\](.*)/.exec(line);
+            if (match) {
+              return (
+                <div key={i}>
+                  <span style={{ color: "#4a5568" }}>[route → </span>
+                  <span style={{ color: "#5070ff", fontWeight: "bold" }}>{match[1]}</span>
+                  <span style={{ color: "#4a5568" }}>]{match[2]}</span>
+                </div>
+              );
+            }
+          }
+          if (line.startsWith("[thinking]")) {
+            return (
+              <div key={i} style={{ color: "#4a5568", fontStyle: "italic" }}>{line}</div>
+            );
+          }
+          return <div key={i} style={{ color: "#4a5568" }}>{line}</div>;
+        })}
+      </div>
+    );
+  }
+
   if (msg.role === "user") {
     return (
       <div className="mb-1">
@@ -76,12 +104,14 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
     );
   }
 
+  // Assistant response — render as markdown
   return (
     <div className="mb-3">
-      <span className="font-mono text-[13px] whitespace-pre-wrap break-words" style={{ color: "#c0c8e0" }}>
-        {msg.content}
-        {msg.content === "" && <span className="animate-pulse" style={{ color: "#e0e4ef" }}>▊</span>}
-      </span>
+      {msg.content === "" ? (
+        <span className="animate-pulse font-mono text-[13px]" style={{ color: "#e0e4ef" }}>▊</span>
+      ) : (
+        <TerminalRenderer content={msg.content} contentType="markdown" />
+      )}
     </div>
   );
 }

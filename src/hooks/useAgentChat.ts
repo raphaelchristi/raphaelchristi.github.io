@@ -5,9 +5,32 @@ import { buildSystemPrompt } from "@/data/agent-files";
 
 export type ChatMessage = {
   id: string;
-  role: "user" | "assistant" | "file";
+  role: "user" | "assistant" | "file" | "routing";
   content: string;
 };
+
+function classifyIntent(msg: string): { agent: string; reason: string } {
+  const lower = msg.toLowerCase();
+
+  // Recruiter patterns
+  if (
+    /\b(hiring|hire|salary|contrat|disponib|remote|vagas?|seniorid|stack completo|curricul|cv|recrut|entrevista|vaga)\b/.test(lower) ||
+    /\b(available|team fit|how to contact|email|linkedin)\b/.test(lower)
+  ) {
+    return { agent: "Recruiter Agent", reason: "hiring/recruitment query" };
+  }
+
+  // Technical patterns
+  if (
+    /\b(arquitetura|architecture|code|código|como funciona|how does|implementa|technical|sistema|ceppem|langgraph|docker|redis|sandbox|pipeline|agent system|multi.?agent)\b/.test(lower) ||
+    /\b(como construiu|how did you build|stack|design pattern|api)\b/.test(lower)
+  ) {
+    return { agent: "Technical Agent", reason: "technical/architecture query" };
+  }
+
+  // Default: Portfolio
+  return { agent: "Portfolio Agent", reason: "general profile query" };
+}
 
 const API_URL = process.env.NEXT_PUBLIC_AGENT_API_URL ?? "";
 
@@ -64,18 +87,27 @@ export function useAgentChat() {
         content: userMessage,
       };
 
+      // Route to the appropriate agent
+      const intent = classifyIntent(userMessage);
+
+      const routingMsg: ChatMessage = {
+        id: `routing-${Date.now()}`,
+        role: "routing",
+        content: `[router] analyzing query...\n[route → ${intent.agent}] reason: ${intent.reason}\n[thinking] loading ${intent.agent.toLowerCase().replace(/ /g, "-")} skills...`,
+      };
+
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
         content: "",
       };
 
-      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      setMessages((prev) => [...prev, userMsg, routingMsg, assistantMsg]);
       setIsLoading(true);
 
       // Build messages for API (only user/assistant, not file reads)
+      // No system prompt here — Hermes Agent has its own multi-agent routing prompt
       const apiMessages = [
-        { role: "system" as const, content: systemPrompt.current },
         ...messages
           .filter((m) => m.role === "user" || m.role === "assistant")
           .map((m) => ({ role: m.role as "user" | "assistant", content: m.content })),
