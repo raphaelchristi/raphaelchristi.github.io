@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useAgent, useCopilotKit } from "@copilotkit/react-core/v2";
+import { useState, useCallback } from "react";
 import { agentFileTree, flattenFiles } from "@/data/agent-files";
 import type { AgentFile } from "@/data/agent-files";
 
@@ -10,8 +9,6 @@ export type ChatMessage = {
   role: "user" | "assistant" | "file" | "routing" | "system";
   content: string;
 };
-
-// === Local commands (ls, cd, cat, etc.) ===
 
 function resolveDir(tree: AgentFile[], cwd: string): AgentFile[] | null {
   if (cwd === "/" || cwd === "") return tree;
@@ -82,8 +79,6 @@ function handleLocalCommand(
   return { handled: false };
 }
 
-// === Intent classification ===
-
 function classifyIntent(msg: string): { agent: string } {
   const lower = msg.toLowerCase();
   if (/(hiring|hire|salary|contrat|disponib|remote|vagas?|seniorid|curricul|recrut|entrevista|contratar|linkedin|email|contact|cv\b|oportunid)/.test(lower)) return { agent: "Recruiter Agent" };
@@ -91,62 +86,17 @@ function classifyIntent(msg: string): { agent: string } {
   return { agent: "Portfolio Agent" };
 }
 
-// === Main hook ===
-
 export function useAgentChat() {
-  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [cwd, setCwd] = useState("");
-  const lastAgentMsgCount = useRef(0);
 
-  // CopilotKit v2 hooks
-  const { agent } = useAgent();
-  const { copilotkit } = useCopilotKit();
-
-  const isLoading = agent.isRunning;
-
-  // Sync CopilotKit agent messages → local messages
-  useEffect(() => {
-    const agentMessages = agent.messages;
-    if (agentMessages.length <= lastAgentMsgCount.current) return;
-
-    // Process new messages from CopilotKit
-    const newMessages = agentMessages.slice(lastAgentMsgCount.current);
-    lastAgentMsgCount.current = agentMessages.length;
-
-    for (const msg of newMessages) {
-      if (msg.role === "assistant" && msg.content) {
-        const content = typeof msg.content === "string" ? msg.content : "";
-        // Clean Hermes skill headers
-        const cleanContent = content
-          .split("\n")
-          .filter((line: string) => !(/^`?📚/.test(line.trim()) || /^`?📦/.test(line.trim())))
-          .join("\n")
-          .trim();
-
-        if (cleanContent) {
-          setLocalMessages((prev) => {
-            // Update existing or add new
-            const existing = prev.findIndex((m) => m.id === `copilot-${msg.id}`);
-            if (existing >= 0) {
-              const updated = [...prev];
-              updated[existing] = { ...updated[existing]!, content: cleanContent };
-              return updated;
-            }
-            return [...prev, { id: `copilot-${msg.id}`, role: "assistant", content: cleanContent }];
-          });
-        }
-      }
-    }
-  }, [agent.messages]);
-
-  // Add a file read
   const addFileRead = useCallback((path: string, content: string) => {
-    setLocalMessages([
+    setMessages([
       { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${path}...\n─────────────────────────────\n${content}` },
     ]);
   }, []);
 
-  // Send message
   const sendMessage = useCallback(
     async (userMessage: string) => {
       const userMsg: ChatMessage = { id: `user-${Date.now()}`, role: "user", content: userMessage };
@@ -154,48 +104,87 @@ export function useAgentChat() {
       // Local commands
       const localResult = handleLocalCommand(userMessage, cwd, setCwd);
       if (localResult.handled) {
-        if (localResult.output === "__CLEAR__") { setLocalMessages([]); lastAgentMsgCount.current = 0; return; }
+        if (localResult.output === "__CLEAR__") { setMessages([]); return; }
         if (localResult.fileRead) {
-          setLocalMessages((prev) => [...prev, userMsg, { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${localResult.fileRead!.path}...\n─────────────────────────────\n${localResult.fileRead!.content}` }]);
+          setMessages((prev) => [...prev, userMsg, { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${localResult.fileRead!.path}...\n─────────────────────────────\n${localResult.fileRead!.content}` }]);
           return;
         }
-        setLocalMessages((prev) => [...prev, userMsg, { id: `system-${Date.now()}`, role: "system", content: localResult.output ?? "" }]);
+        setMessages((prev) => [...prev, userMsg, { id: `system-${Date.now()}`, role: "system", content: localResult.output ?? "" }]);
         return;
       }
 
-      // Agent chat via CopilotKit
+      // Agent chat via /api/chat
       const intent = classifyIntent(userMessage);
       const routingMsg: ChatMessage = { id: `routing-${Date.now()}`, role: "routing", content: intent.agent };
+      const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: "assistant", content: "" };
 
-      setLocalMessages((prev) => [...prev, userMsg, routingMsg]);
+      setMessages((prev) => [...prev, userMsg, routingMsg, assistantMsg]);
+      setIsLoading(true);
+
+      const apiMessages = messages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .map((m) => ({ role: m.role, content: m.content }));
+      apiMessages.push({ role: "user", content: userMessage });
 
       try {
-        // Add user message to CopilotKit agent
-        agent.addMessage({
-          id: crypto.randomUUID(),
-          role: "user",
-          content: userMessage,
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: apiMessages }),
         });
 
-        // Run the agent
-        await copilotkit.runAgent({ agent });
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        const reader = res.body?.getReader();
+        if (!reader) throw new Error("No response body");
+
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data: ")) continue;
+            const data = trimmed.slice(6);
+            if (data === "[DONE]") break;
+
+            try {
+              const parsed = JSON.parse(data) as { choices?: Array<{ delta?: { content?: string } }> };
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  const last = updated[updated.length - 1];
+                  if (last?.role === "assistant") {
+                    updated[updated.length - 1] = { ...last, content: last.content + content };
+                  }
+                  return updated;
+                });
+              }
+            } catch { /* skip */ }
+          }
+        }
       } catch {
-        setLocalMessages((prev) => [
-          ...prev,
-          { id: `system-${Date.now()}`, role: "system", content: "connection error. try again." },
-        ]);
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last?.role === "assistant" && last.content === "") {
+            updated[updated.length - 1] = { ...last, content: "connection error. try again." };
+          }
+          return updated;
+        });
+      } finally {
+        setIsLoading(false);
       }
     },
-    [cwd, agent, copilotkit],
+    [cwd, messages],
   );
 
-  return {
-    messages: localMessages,
-    isOnline: true,
-    isLoading,
-    hasCheckedHealth: true,
-    sendMessage,
-    addFileRead,
-    chatEnabled: true,
-  };
+  return { messages, isOnline: true, isLoading, hasCheckedHealth: true, sendMessage, addFileRead, chatEnabled: true };
 }
