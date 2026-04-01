@@ -81,13 +81,13 @@ export default function HeroSection() {
           className="mt-6"
         >
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: "var(--foreground)" }}>
-            Research Engineer &
+            AI Engineer &
           </h1>
           <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold"
             style={{ color: "#5070FF" }}
           >
-            LLM Developer.
+            AI Architect.
           </h1>
         </motion.div>
 
