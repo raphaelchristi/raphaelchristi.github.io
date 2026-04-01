@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { ChevronRight, Folder, FolderOpen, FileText, Braces } from "lucide-react";
 import type { AgentFile } from "@/data/agent-files";
 
 type Props = {
@@ -32,6 +33,18 @@ export default function FileTreeItem({
     }
   };
 
+  const FileIcon = () => {
+    if (isFolder) {
+      return expanded
+        ? <FolderOpen size={14} style={{ color: "#5070ff" }} />
+        : <Folder size={14} style={{ color: "#5070ff" }} />;
+    }
+    if (file.name.endsWith(".json")) {
+      return <Braces size={14} style={{ color: "#a5b4fc" }} />;
+    }
+    return <FileText size={14} style={{ color: "#7a8299" }} />;
+  };
+
   return (
     <div>
       <button
@@ -44,15 +57,15 @@ export default function FileTreeItem({
         }}
       >
         {isFolder && (
-          <motion.span
+          <motion.div
             animate={{ rotate: expanded ? 90 : 0 }}
             transition={{ duration: 0.15 }}
-            className="inline-block text-[10px]"
+            className="flex items-center"
           >
-            ▶
-          </motion.span>
+            <ChevronRight size={12} style={{ color: "#7a8299" }} />
+          </motion.div>
         )}
-        <span>{isFolder ? (expanded ? "📂" : "📁") : file.name.endsWith(".json") ? "⚙️" : "📄"}</span>
+        <FileIcon />
         <span>{file.name}</span>
       </button>
 
