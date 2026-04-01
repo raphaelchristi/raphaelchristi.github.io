@@ -1,21 +1,21 @@
 services:
-  hermes-agent:
+  agent:
     build:
-      context: ./hermes-agent
+      context: ./backend
       dockerfile: Dockerfile
     container_name: hermes-agent
     restart: unless-stopped
     ports:
       - "8642:8642"
-    volumes:
-      - ./hermes-data:/opt/data
-    command: gateway run
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - MODEL_NAME=google/gemini-3.1-flash-lite-preview
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8642/health')"]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 15s
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -23,5 +23,5 @@ services:
     restart: unless-stopped
     command: tunnel --no-autoupdate --protocol http2 run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     depends_on:
-      hermes-agent:
+      agent:
         condition: service_healthy

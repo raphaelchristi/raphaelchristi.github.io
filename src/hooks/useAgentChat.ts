@@ -113,7 +113,8 @@ export function useAgentChat() {
         return;
       }
 
-      // Agent chat via /api/chat
+      // Agent chat via backend (Docker → Cloudflare Tunnel)
+      const API_URL = process.env.NEXT_PUBLIC_AGENT_API_URL ?? "";
       const intent = classifyIntent(userMessage);
       const routingMsg: ChatMessage = { id: `routing-${Date.now()}`, role: "routing", content: intent.agent };
       const assistantMsg: ChatMessage = { id: `assistant-${Date.now()}`, role: "assistant", content: "" };
@@ -127,7 +128,7 @@ export function useAgentChat() {
       apiMessages.push({ role: "user", content: userMessage });
 
       try {
-        const res = await fetch("/api/chat", {
+        const res = await fetch(`${API_URL}/v1/chat/completions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ messages: apiMessages }),

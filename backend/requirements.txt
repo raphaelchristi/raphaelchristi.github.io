@@ -1,0 +1,7 @@
+fastapi[standard]==0.115.*
+uvicorn==0.34.*
+openai==1.*
+langchain-core>=0.3
+langchain-openai>=0.3
+langgraph>=0.4
+pydantic>=2
