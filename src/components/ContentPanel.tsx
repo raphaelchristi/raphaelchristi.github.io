@@ -154,7 +154,7 @@ export default function ContentPanel({
         {/* Inline prompt */}
         {!isLoading && (
           <div className="flex items-start font-mono text-[13px]">
-            <span style={{ color: "#78d97c" }}>$ </span>
+            <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#78d97c" }}>raphael@agent</span><span style={{ color: "#ccc" }}>:</span><span style={{ color: "#6cb6ff" }}>~</span><span style={{ color: "#ccc" }}>$ </span></span>
             {chatEnabled ? (
               <span
                 ref={inputRef}
