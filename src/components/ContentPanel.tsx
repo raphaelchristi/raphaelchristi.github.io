@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "motion/react";
 import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
-import ChatInput from "./ChatInput";
 
 type Props = {
   selectedFile: AgentFile | null;
@@ -20,10 +19,10 @@ type Props = {
 function TerminalTitleBar() {
   return (
     <div
-      className="flex items-center h-10 px-4 shrink-0"
+      className="flex items-center h-10 px-4 shrink-0 rounded-t-lg"
       style={{
-        backgroundColor: "#2a2a2a",
-        borderBottom: "1px solid #333",
+        backgroundColor: "#3a3a3a",
+        borderBottom: "1px solid #4a4a4a",
       }}
     >
       <div className="flex items-center gap-2">
@@ -32,8 +31,8 @@ function TerminalTitleBar() {
         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#28c840" }} />
       </div>
       <span
-        className="flex-1 text-center text-[12px] font-mono"
-        style={{ color: "#888" }}
+        className="flex-1 text-center text-[13px] font-mono"
+        style={{ color: "#999" }}
       >
         raphael.agent — bash
       </span>
@@ -45,14 +44,8 @@ function TerminalTitleBar() {
 function MessageBlock({ msg }: { msg: ChatMessage }) {
   if (msg.role === "file") {
     return (
-      <div className="mb-4">
-        <pre
-          className="font-mono text-[13px] md:text-[14px] leading-relaxed whitespace-pre-wrap break-words"
-          style={{
-            color: "#d4d4d4",
-            textShadow: "0 0 8px rgba(74, 222, 128, 0.15)",
-          }}
-        >
+      <div className="mb-3">
+        <pre className="font-mono text-[13px] leading-relaxed whitespace-pre-wrap break-words" style={{ color: "#ccc" }}>
           {msg.content}
         </pre>
       </div>
@@ -61,46 +54,18 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
 
   if (msg.role === "user") {
     return (
-      <div className="mb-2">
-        <span
-          className="font-mono text-[13px] md:text-[14px]"
-          style={{
-            color: "#4ade80",
-            textShadow: "0 0 10px rgba(74, 222, 128, 0.3)",
-          }}
-        >
-          ${" "}
-        </span>
-        <span
-          className="font-mono text-[13px] md:text-[14px]"
-          style={{ color: "#d4d4d4" }}
-        >
-          {msg.content}
-        </span>
+      <div className="mb-1">
+        <span className="font-mono text-[13px]" style={{ color: "#78d97c" }}>$ </span>
+        <span className="font-mono text-[13px]" style={{ color: "#f0f0f0" }}>{msg.content}</span>
       </div>
     );
   }
 
-  // assistant
   return (
-    <div className="mb-4">
-      <span
-        className="font-mono text-[13px] md:text-[14px]"
-        style={{
-          color: "#4ade80",
-          textShadow: "0 0 10px rgba(74, 222, 128, 0.3)",
-        }}
-      >
-        ▶{" "}
-      </span>
-      <span
-        className="font-mono text-[13px] md:text-[14px] whitespace-pre-wrap break-words"
-        style={{ color: "#d4d4d4" }}
-      >
+    <div className="mb-3">
+      <span className="font-mono text-[13px] whitespace-pre-wrap break-words" style={{ color: "#ccc" }}>
         {msg.content}
-        {msg.content === "" && (
-          <span className="animate-pulse" style={{ color: "#4ade80" }}>▊</span>
-        )}
+        {msg.content === "" && <span className="animate-pulse" style={{ color: "#f0f0f0" }}>▊</span>}
       </span>
     </div>
   );
@@ -117,73 +82,99 @@ export default function ContentPanel({
   onFileRead,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLSpanElement>(null);
   const lastFileRef = useRef<string>("");
+  const [inputValue, setInputValue] = useState("");
 
-  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, inputValue]);
+
+  // Focus input on click anywhere in terminal
+  const focusInput = useCallback(() => {
+    inputRef.current?.focus();
+  }, []);
 
   // When a file is selected, add it to conversation
   useEffect(() => {
     if (selectedFile && selectedPath && selectedPath !== lastFileRef.current) {
       lastFileRef.current = selectedPath;
-      const content = selectedFile.contentType === "json"
-        ? selectedFile.content ?? "{}"
-        : selectedFile.content ?? "";
+      const content = selectedFile.content ?? "";
       onFileRead(selectedPath, content);
     }
   }, [selectedFile, selectedPath, onFileRead]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      const trimmed = inputValue.trim();
+      if (trimmed && !isLoading) {
+        onSendMessage(trimmed);
+        setInputValue("");
+        if (inputRef.current) inputRef.current.textContent = "";
+      }
+    }
+  };
+
+  const handleInput = () => {
+    setInputValue(inputRef.current?.textContent ?? "");
+  };
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
       <TerminalTitleBar />
 
-      {/* Scrollable terminal content */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-auto p-5 md:p-6"
-        style={{ backgroundColor: "#0a0a0a" }}
+        className="flex-1 overflow-auto p-4 md:p-5 cursor-text"
+        style={{ backgroundColor: "#1c1c1e" }}
+        onClick={focusInput}
       >
-        {/* Status message */}
+        {/* Status line */}
         {hasCheckedHealth && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mb-4 font-mono text-[13px] md:text-[14px]"
-            style={{
-              color: "#4ade80",
-              textShadow: "0 0 10px rgba(74, 222, 128, 0.3)",
-            }}
+            className="mb-3 font-mono text-[13px]"
+            style={{ color: "#999" }}
           >
             {chatEnabled
-              ? "▶ agent online. ask me anything about raphael."
-              : "▶ agent is sleeping... browse the files to learn about raphael."}
+              ? "Welcome to raphael.agent. Type a question or browse files."
+              : "Agent offline. Browse files to learn about Raphael."}
           </motion.div>
         )}
 
-        {/* Conversation history */}
+        {/* Messages */}
         {messages.map((msg) => (
           <MessageBlock key={msg.id} msg={msg} />
         ))}
 
-        {/* Blinking cursor at the end */}
+        {/* Inline prompt */}
         {!isLoading && (
-          <div className="font-mono text-[13px] md:text-[14px]">
-            <span style={{ color: "#4ade80", textShadow: "0 0 10px rgba(74, 222, 128, 0.3)" }}>
-              $
-            </span>
-            <span className="animate-pulse ml-1" style={{ color: "#4ade80" }}>▊</span>
+          <div className="flex items-start font-mono text-[13px]">
+            <span style={{ color: "#78d97c" }}>$ </span>
+            {chatEnabled ? (
+              <span
+                ref={inputRef}
+                contentEditable
+                suppressContentEditableWarning
+                onKeyDown={handleKeyDown}
+                onInput={handleInput}
+                className="outline-none flex-1 min-w-[1px]"
+                style={{
+                  color: "#f0f0f0",
+                  caretColor: "#f0f0f0",
+                }}
+                spellCheck={false}
+              />
+            ) : (
+              <span className="animate-pulse" style={{ color: "#f0f0f0" }}>▊</span>
+            )}
           </div>
         )}
       </div>
-
-      {/* Chat input - only when online */}
-      {chatEnabled && (
-        <ChatInput onSend={onSendMessage} disabled={isLoading} />
-      )}
     </div>
   );
 }

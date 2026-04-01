@@ -8,9 +8,8 @@ import FileTree from "./FileTree";
 import ContentPanel from "./ContentPanel";
 
 export default function FileExplorer() {
-  const defaultFile = agentFileTree[0]!; // AGENT.md
-  const [selectedPath, setSelectedPath] = useState("AGENT.md");
-  const [selectedFile, setSelectedFile] = useState<AgentFile>(defaultFile);
+  const [selectedPath, setSelectedPath] = useState("");
+  const [selectedFile, setSelectedFile] = useState<AgentFile | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const {
