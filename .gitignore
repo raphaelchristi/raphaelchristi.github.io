@@ -44,3 +44,9 @@ yarn-error.log*
 
 # idea files
 .idea
+
+# hermes agent data (secrets, sessions)
+hermes-data/.env
+hermes-data/sessions/
+hermes-data/memory/
+hermes-agent/

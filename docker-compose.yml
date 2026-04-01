@@ -1,0 +1,28 @@
+services:
+  hermes-agent:
+    build:
+      context: ./hermes-agent
+      dockerfile: Dockerfile
+    container_name: hermes-agent
+    restart: unless-stopped
+    ports:
+      - "8642:8642"
+    volumes:
+      - ./hermes-data:/opt/data
+    command: gateway run
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8642/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      hermes-agent:
+        condition: service_healthy
