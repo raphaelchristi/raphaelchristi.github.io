@@ -6,6 +6,39 @@ import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
 import TerminalRenderer from "./TerminalRenderer";
 
+function RoutingStatus({ agentName }: { agentName: string }) {
+  const [phase, setPhase] = useState(0);
+  const phases = [
+    "routing query...",
+    `→ ${agentName}`,
+    "loading skills...",
+    "generating response...",
+  ];
+
+  useEffect(() => {
+    if (phase < phases.length - 1) {
+      const timeout = setTimeout(() => setPhase((p) => p + 1), 400);
+      return () => clearTimeout(timeout);
+    }
+  }, [phase, phases.length]);
+
+  return (
+    <div className="mb-2 font-mono text-[12px] flex items-center gap-2" style={{ color: "#4a5568" }}>
+      <span className="animate-pulse" style={{ color: "#5070ff" }}>●</span>
+      <span>
+        {phase === 1 ? (
+          <>
+            <span style={{ color: "#4a5568" }}>→ </span>
+            <span style={{ color: "#5070ff", fontWeight: "bold" }}>{agentName}</span>
+          </>
+        ) : (
+          phases[phase]
+        )}
+      </span>
+    </div>
+  );
+}
+
 type Props = {
   selectedFile: AgentFile | null;
   selectedPath: string;
@@ -68,31 +101,7 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
   }
 
   if (msg.role === "routing") {
-    const lines = msg.content.split("\n");
-    return (
-      <div className="mb-2 font-mono text-[12px] leading-relaxed pl-1 border-l-2" style={{ borderColor: "#1a2340", paddingLeft: "8px" }}>
-        {lines.map((line, i) => {
-          if (line.startsWith("[route")) {
-            const match = /\[route → (.+?)\](.*)/.exec(line);
-            if (match) {
-              return (
-                <div key={i}>
-                  <span style={{ color: "#4a5568" }}>[route → </span>
-                  <span style={{ color: "#5070ff", fontWeight: "bold" }}>{match[1]}</span>
-                  <span style={{ color: "#4a5568" }}>]{match[2]}</span>
-                </div>
-              );
-            }
-          }
-          if (line.startsWith("[thinking]")) {
-            return (
-              <div key={i} style={{ color: "#4a5568", fontStyle: "italic" }}>{line}</div>
-            );
-          }
-          return <div key={i} style={{ color: "#4a5568" }}>{line}</div>;
-        })}
-      </div>
-    );
+    return <RoutingStatus agentName={msg.content} />;
   }
 
   if (msg.role === "user") {

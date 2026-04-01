@@ -72,11 +72,15 @@ function parseBold(text: string): React.ReactNode {
 
   while (remaining.length > 0) {
     const boldMatch = /\*\*(.+?)\*\*/.exec(remaining);
+    const italicMatch = /(?<!\*)\*([^*]+?)\*(?!\*)/.exec(remaining);
     const linkMatch = LINK_RE.exec(remaining);
+    const codeMatch = /`([^`]+?)`/.exec(remaining);
 
     const matches = [
       boldMatch ? { type: "bold" as const, match: boldMatch, index: boldMatch.index } : null,
+      italicMatch ? { type: "italic" as const, match: italicMatch, index: italicMatch.index } : null,
       linkMatch ? { type: "link" as const, match: linkMatch, index: linkMatch.index } : null,
+      codeMatch ? { type: "code" as const, match: codeMatch, index: codeMatch.index } : null,
     ]
       .filter((m): m is NonNullable<typeof m> => m !== null)
       .sort((a, b) => a.index - b.index);
@@ -94,6 +98,18 @@ function parseBold(text: string): React.ReactNode {
     if (earliest.type === "bold") {
       parts.push(
         <span key={key++} className="font-bold" style={{ color: "#e0e4ef" }}>
+          {earliest.match[1]}
+        </span>,
+      );
+    } else if (earliest.type === "italic") {
+      parts.push(
+        <span key={key++} className="font-semibold" style={{ color: "#c0c8e0" }}>
+          {earliest.match[1]}
+        </span>,
+      );
+    } else if (earliest.type === "code") {
+      parts.push(
+        <span key={key++} className="px-1 py-0.5 rounded text-[12px]" style={{ backgroundColor: "#1a2340", color: "#a5b4fc" }}>
           {earliest.match[1]}
         </span>,
       );
@@ -145,12 +161,23 @@ function renderMarkdownAsTerminal(content: string): React.ReactNode {
       );
     }
 
-    // List items → green bullet, remove dash
-    if (processed.startsWith("- ")) {
+    // List items → bullet, supports both "- " and "* "
+    if (processed.startsWith("- ") || processed.startsWith("* ")) {
       return (
         <div key={i}>
           <span style={{ color: "#5070ff" }}>  ▸ </span>
           {parseBold(processed.slice(2))}
+        </div>
+      );
+    }
+
+    // Indented list items ("  - " or "  * ")
+    const indentMatch = /^(\s+)[-*] (.*)/.exec(processed);
+    if (indentMatch) {
+      return (
+        <div key={i}>
+          <span style={{ color: "#5070ff" }}>    ▸ </span>
+          {parseBold(indentMatch[2] ?? "")}
         </div>
       );
     }

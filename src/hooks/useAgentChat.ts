@@ -9,27 +9,25 @@ export type ChatMessage = {
   content: string;
 };
 
-function classifyIntent(msg: string): { agent: string; reason: string } {
+function classifyIntent(msg: string): { agent: string } {
   const lower = msg.toLowerCase();
 
   // Recruiter patterns
   if (
-    /\b(hiring|hire|salary|contrat|disponib|remote|vagas?|seniorid|stack completo|curricul|cv|recrut|entrevista|vaga)\b/.test(lower) ||
-    /\b(available|team fit|how to contact|email|linkedin)\b/.test(lower)
+    /(hiring|hire|salary|contrat|disponib|remote|vagas?|seniorid|curricul|recrut|entrevista|contratar|linkedin|email|contact|cv\b|oportunid)/.test(lower)
   ) {
-    return { agent: "Recruiter Agent", reason: "hiring/recruitment query" };
+    return { agent: "Recruiter Agent" };
   }
 
   // Technical patterns
   if (
-    /\b(arquitetura|architecture|code|código|como funciona|how does|implementa|technical|sistema|ceppem|langgraph|docker|redis|sandbox|pipeline|agent system|multi.?agent)\b/.test(lower) ||
-    /\b(como construiu|how did you build|stack|design pattern|api)\b/.test(lower)
+    /(arquitetura|architecture|code|código|como funciona|how does|implementa|technical|ceppem|langgraph|docker|redis|sandbox|pipeline|multi.?agent|como construiu|how did you build|design pattern)/.test(lower)
   ) {
-    return { agent: "Technical Agent", reason: "technical/architecture query" };
+    return { agent: "Technical Agent" };
   }
 
   // Default: Portfolio
-  return { agent: "Portfolio Agent", reason: "general profile query" };
+  return { agent: "Portfolio Agent" };
 }
 
 const API_URL = process.env.NEXT_PUBLIC_AGENT_API_URL ?? "";
@@ -93,7 +91,7 @@ export function useAgentChat() {
       const routingMsg: ChatMessage = {
         id: `routing-${Date.now()}`,
         role: "routing",
-        content: `[router] analyzing query...\n[route → ${intent.agent}] reason: ${intent.reason}\n[thinking] loading ${intent.agent.toLowerCase().replace(/ /g, "-")} skills...`,
+        content: intent.agent,
       };
 
       const assistantMsg: ChatMessage = {
