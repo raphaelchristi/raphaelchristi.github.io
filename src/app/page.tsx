@@ -4,8 +4,6 @@ import HeroSection from "@/components/HeroSection";
 import FileExplorer from "@/components/FileExplorer";
 import NoiseOverlay from "@/components/NoiseOverlay";
 import { CopilotKit } from "@copilotkit/react-core";
-import { CopilotPopup } from "@copilotkit/react-ui";
-import "@copilotkit/react-ui/styles.css";
 
 export default function Page() {
   return (
@@ -23,15 +21,6 @@ export default function Page() {
           <HeroSection />
           <FileExplorer />
         </div>
-
-        {/* CopilotKit Chat Popup */}
-        <CopilotPopup
-          labels={{
-            title: "raphael.agent",
-            initial: "Hi! I'm Raphael's AI agent. Ask me anything about my work, projects, or experience.",
-          }}
-          clickOutsideToClose={false}
-        />
       </div>
     </CopilotKit>
   );
