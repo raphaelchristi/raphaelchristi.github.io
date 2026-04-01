@@ -19,9 +19,41 @@ app.use((req, res, next) => {
   next();
 });
 
+const PYTHON_URL = process.env.PYTHON_URL || "http://agent:8000";
+
 // Health
 app.get("/health", (req, res) => {
   res.json({ status: "ok", runtime: "copilotkit", agent: AGENT_URL });
+});
+
+// Proxy /v1/chat/completions to Python backend
+app.post("/v1/chat/completions", async (req, res) => {
+  try {
+    const response = await fetch(`${PYTHON_URL}/v1/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req.body),
+    });
+
+    res.writeHead(response.status, {
+      "Content-Type": response.headers.get("content-type") || "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    const reader = response.body.getReader();
+    const pump = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        res.write(value);
+      }
+      res.end();
+    };
+    await pump();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // CopilotKit runtime endpoint
