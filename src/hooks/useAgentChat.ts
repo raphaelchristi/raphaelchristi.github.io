@@ -1,13 +1,118 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { buildSystemPrompt } from "@/data/agent-files";
+import { buildSystemPrompt, agentFileTree, flattenFiles } from "@/data/agent-files";
+import type { AgentFile } from "@/data/agent-files";
 
 export type ChatMessage = {
   id: string;
-  role: "user" | "assistant" | "file" | "routing";
+  role: "user" | "assistant" | "file" | "routing" | "system";
   content: string;
 };
+
+function resolveDir(tree: AgentFile[], cwd: string): AgentFile[] | null {
+  if (cwd === "/" || cwd === "") return tree;
+  const parts = cwd.split("/").filter(Boolean);
+  let current = tree;
+  for (const part of parts) {
+    const found = current.find((f) => f.name === part && f.type === "folder");
+    if (!found?.children) return null;
+    current = found.children;
+  }
+  return current;
+}
+
+function resolveFile(tree: AgentFile[], path: string): { file: AgentFile; fullPath: string } | null {
+  const allFiles = flattenFiles(tree);
+  const match = allFiles.find((f) => f.path === path || f.path.endsWith(`/${path}`) || f.file.name === path);
+  return match ? { file: match.file, fullPath: match.path } : null;
+}
+
+function handleLocalCommand(
+  input: string,
+  cwd: string,
+  setCwd: (cwd: string) => void,
+): { handled: boolean; output?: string; fileRead?: { path: string; content: string } } {
+  const parts = input.trim().split(/\s+/);
+  const cmd = parts[0]?.toLowerCase();
+  const arg = parts.slice(1).join(" ");
+
+  if (cmd === "help") {
+    return {
+      handled: true,
+      output: `Available commands:
+  ls          List files in current directory
+  cd <dir>    Change directory (cd .., cd skills/core)
+  pwd         Print working directory
+  cat <file>  Read a file
+  tree        Show full file tree
+  clear       Clear terminal
+  whoami      Who am I?
+  help        Show this help
+
+Anything else is sent to the AI agent.`,
+    };
+  }
+
+  if (cmd === "clear") {
+    return { handled: true, output: "__CLEAR__" };
+  }
+
+  if (cmd === "whoami") {
+    return { handled: true, output: "raphael" };
+  }
+
+  if (cmd === "pwd") {
+    return { handled: true, output: `/${cwd || "raphael.agent"}` };
+  }
+
+  if (cmd === "ls") {
+    const dir = resolveDir(agentFileTree, cwd);
+    if (!dir) return { handled: true, output: `ls: cannot access '${cwd}': No such directory` };
+    const listing = dir
+      .map((f) => (f.type === "folder" ? `\x1b[34m${f.name}/\x1b[0m` : f.name))
+      .join("  ");
+    return { handled: true, output: listing.replace(/\x1b\[\d+m/g, "") + "\n" + dir.map((f) => f.type === "folder" ? `📂 ${f.name}/` : `📄 ${f.name}`).join("\n") };
+  }
+
+  if (cmd === "cd") {
+    if (!arg || arg === "/" || arg === "~") {
+      setCwd("");
+      return { handled: true, output: "" };
+    }
+    if (arg === "..") {
+      const parts = cwd.split("/").filter(Boolean);
+      parts.pop();
+      setCwd(parts.join("/"));
+      return { handled: true, output: "" };
+    }
+    const newPath = cwd ? `${cwd}/${arg}` : arg;
+    const dir = resolveDir(agentFileTree, newPath);
+    if (!dir) return { handled: true, output: `cd: no such directory: ${arg}` };
+    setCwd(newPath);
+    return { handled: true, output: "" };
+  }
+
+  if (cmd === "cat") {
+    if (!arg) return { handled: true, output: "cat: missing file argument" };
+    const searchPath = cwd ? `${cwd}/${arg}` : arg;
+    const result = resolveFile(agentFileTree, searchPath) ?? resolveFile(agentFileTree, arg);
+    if (!result) return { handled: true, output: `cat: ${arg}: No such file` };
+    return { handled: true, fileRead: { path: result.fullPath, content: result.file.content ?? "" } };
+  }
+
+  if (cmd === "tree") {
+    const allFiles = flattenFiles(agentFileTree);
+    const treeStr = allFiles.map((f) => {
+      const depth = f.path.split("/").length - 1;
+      const indent = "  ".repeat(depth);
+      return `${indent}${f.file.type === "folder" ? "📂" : "📄"} ${f.file.name}`;
+    }).join("\n");
+    return { handled: true, output: `raphael.agent/\n${treeStr}` };
+  }
+
+  return { handled: false };
+}
 
 function classifyIntent(msg: string): { agent: string } {
   const lower = msg.toLowerCase();
@@ -37,6 +142,7 @@ export function useAgentChat() {
   const [isOnline, setIsOnline] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasCheckedHealth, setHasCheckedHealth] = useState(false);
+  const [cwd, setCwd] = useState("");
   const abortRef = useRef<AbortController | null>(null);
   const systemPrompt = useRef(buildSystemPrompt());
 
@@ -74,16 +180,47 @@ export function useAgentChat() {
     ]);
   }, []);
 
-  // Send a chat message
+  // Send a chat message (or handle local command)
   const sendMessage = useCallback(
     async (userMessage: string) => {
-      if (!API_URL || !isOnline || isLoading) return;
-
       const userMsg: ChatMessage = {
         id: `user-${Date.now()}`,
         role: "user",
         content: userMessage,
       };
+
+      // Try local commands first
+      const localResult = handleLocalCommand(userMessage, cwd, setCwd);
+      if (localResult.handled) {
+        if (localResult.output === "__CLEAR__") {
+          setMessages([]);
+          return;
+        }
+        if (localResult.fileRead) {
+          setMessages((prev) => [
+            ...prev,
+            userMsg,
+            { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${localResult.fileRead!.path}...\n─────────────────────────────\n${localResult.fileRead!.content}` },
+          ]);
+          return;
+        }
+        setMessages((prev) => [
+          ...prev,
+          userMsg,
+          { id: `system-${Date.now()}`, role: "system", content: localResult.output ?? "" },
+        ]);
+        return;
+      }
+
+      // Not a local command — send to agent
+      if (!API_URL || !isOnline || isLoading) {
+        setMessages((prev) => [
+          ...prev,
+          userMsg,
+          { id: `system-${Date.now()}`, role: "system", content: "agent offline. try local commands: help, ls, cat <file>" },
+        ]);
+        return;
+      }
 
       // Route to the appropriate agent
       const intent = classifyIntent(userMessage);
@@ -190,7 +327,7 @@ export function useAgentChat() {
         abortRef.current = null;
       }
     },
-    [isOnline, isLoading, messages],
+    [isOnline, isLoading, messages, cwd],
   );
 
   return {

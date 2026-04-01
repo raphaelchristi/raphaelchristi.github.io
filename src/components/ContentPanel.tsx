@@ -6,13 +6,12 @@ import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
 import TerminalRenderer from "./TerminalRenderer";
 
-function RoutingStatus({ agentName }: { agentName: string }) {
+function RoutingStatus({ agentName, done }: { agentName: string; done: boolean }) {
   const [phase, setPhase] = useState(0);
   const phases = [
     "routing query...",
     `→ ${agentName}`,
     "loading skills...",
-    "generating response...",
   ];
 
   useEffect(() => {
@@ -21,6 +20,9 @@ function RoutingStatus({ agentName }: { agentName: string }) {
       return () => clearTimeout(timeout);
     }
   }, [phase, phases.length]);
+
+  // Hide completely once response is done
+  if (done) return null;
 
   return (
     <div className="mb-2 font-mono text-[12px] flex items-center gap-2" style={{ color: "#4a5568" }}>
@@ -75,7 +77,7 @@ function TerminalTitleBar() {
   );
 }
 
-function MessageBlock({ msg }: { msg: ChatMessage }) {
+function MessageBlock({ msg, nextMsg }: { msg: ChatMessage; nextMsg?: ChatMessage }) {
   if (msg.role === "file") {
     // Extract header line (▶ reading ...) and content
     const lines = msg.content.split("\n");
@@ -100,8 +102,19 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
     );
   }
 
+  if (msg.role === "system") {
+    return (
+      <div className="mb-3">
+        <pre className="font-mono text-[13px] whitespace-pre-wrap" style={{ color: "#c0c8e0" }}>
+          {msg.content}
+        </pre>
+      </div>
+    );
+  }
+
   if (msg.role === "routing") {
-    return <RoutingStatus agentName={msg.content} />;
+    const responseDone = nextMsg?.role === "assistant" && nextMsg.content.length > 0;
+    return <RoutingStatus agentName={msg.content} done={responseDone} />;
   }
 
   if (msg.role === "user") {
@@ -113,14 +126,20 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
     );
   }
 
-  // Assistant response — render as markdown
+  // Assistant response — filter Hermes skill headers, render as markdown
+  const cleanContent = msg.content
+    .split("\n")
+    .filter((line) => !(/^`?📚/.test(line.trim()) || /^`?📦/.test(line.trim()) || /^`?🔧/.test(line.trim())))
+    .join("\n")
+    .trim();
+
   return (
     <div className="mb-3">
       {msg.content === "" ? (
         <span className="animate-pulse font-mono text-[13px]" style={{ color: "#e0e4ef" }}>▊</span>
-      ) : (
-        <TerminalRenderer content={msg.content} contentType="markdown" />
-      )}
+      ) : cleanContent ? (
+        <TerminalRenderer content={cleanContent} contentType="markdown" />
+      ) : null}
     </div>
   );
 }
@@ -201,31 +220,27 @@ export default function ContentPanel({
         )}
 
         {/* Messages */}
-        {messages.map((msg) => (
-          <MessageBlock key={msg.id} msg={msg} />
+        {messages.map((msg, idx) => (
+          <MessageBlock key={msg.id} msg={msg} nextMsg={messages[idx + 1]} />
         ))}
 
         {/* Inline prompt */}
         {!isLoading && (
           <div className="flex items-start font-mono text-[13px]">
             <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
-            {chatEnabled ? (
-              <span
-                ref={inputRef}
-                contentEditable
-                suppressContentEditableWarning
-                onKeyDown={handleKeyDown}
-                onInput={handleInput}
-                className="outline-none flex-1 min-w-[1px]"
-                style={{
-                  color: "#e0e4ef",
-                  caretColor: "#f0f0f0",
-                }}
-                spellCheck={false}
-              />
-            ) : (
-              <span className="animate-pulse" style={{ color: "#e0e4ef" }}>▊</span>
-            )}
+            <span
+              ref={inputRef}
+              contentEditable
+              suppressContentEditableWarning
+              onKeyDown={handleKeyDown}
+              onInput={handleInput}
+              className="outline-none flex-1 min-w-[1px]"
+              style={{
+                color: "#e0e4ef",
+                caretColor: "#f0f0f0",
+              }}
+              spellCheck={false}
+            />
           </div>
         )}
       </div>
