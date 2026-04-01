@@ -69,17 +69,7 @@ async def chat_completions(request: ChatRequest):
             content = ai_messages[-1].content if ai_messages else "I'm here. How can I help?"
             routed_to = result.get("current_agent", "portfolio")
 
-            # Stream the routing info first
-            routing_text = f"[routed → {routed_to} agent]\n\n"
-            chunk = {
-                "id": chat_id,
-                "object": "chat.completion.chunk",
-                "model": "raphael-agent",
-                "choices": [{"index": 0, "delta": {"content": routing_text}}],
-            }
-            yield f"data: {json.dumps(chunk)}\n\n"
-
-            # Stream content character by character (simulated streaming)
+            # Stream content
             batch_size = 3
             for i in range(0, len(content), batch_size):
                 text_chunk = content[i : i + batch_size]
