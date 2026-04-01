@@ -32,7 +32,7 @@ export default function FileExplorer() {
       className="w-full border-t"
       style={{
         borderColor: "var(--border)",
-        height: "calc(100vh - 160px)",
+        height: "calc(100vh - 100px)",
         minHeight: "500px",
       }}
     >

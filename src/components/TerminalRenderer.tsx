@@ -234,7 +234,7 @@ export default function TerminalRenderer({
 }) {
   return (
     <pre
-      className="font-mono text-[13px] md:text-[14px] leading-relaxed whitespace-pre-wrap break-words"
+      className="font-mono text-[14px] md:text-[15px] leading-relaxed whitespace-pre-wrap break-words"
       style={{
         color: "#c0c8e0",
         textShadow: "0 0 8px rgba(80, 112, 255, 0.1)",

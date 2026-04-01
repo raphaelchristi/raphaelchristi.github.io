@@ -46,10 +46,9 @@ export function useAgentChat() {
     return () => clearInterval(interval);
   }, []);
 
-  // Add a file read to the conversation (not sent to LLM)
+  // Add a file read — clears previous messages (clean terminal)
   const addFileRead = useCallback((path: string, content: string) => {
-    setMessages((prev) => [
-      ...prev,
+    setMessages([
       { id: `file-${Date.now()}`, role: "file", content: `▶ reading ${path}...\n─────────────────────────────\n${content}` },
     ]);
   }, []);

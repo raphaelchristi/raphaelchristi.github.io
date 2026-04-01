@@ -48,7 +48,7 @@ export default function HeroSection() {
   const projectsCount = countByFolder("projects");
 
   return (
-    <section className="w-full py-20 md:py-32 text-center overflow-hidden">
+    <section className="w-full py-12 md:py-20 text-center overflow-hidden">
       <div className="container mx-auto px-4">
         {/* ASCII art title - exact Hermes Agent style */}
         <motion.pre
