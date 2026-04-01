@@ -4,21 +4,6 @@ import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { countByFolder } from "@/data/agent-files";
 
-const ASCII_ART = `
-██████╗   █████╗  ██████╗  ██╗  ██╗  █████╗  ███████╗ ██╗
-██╔══██╗ ██╔══██╗ ██╔══██╗ ██║  ██║ ██╔══██╗ ██╔════╝ ██║
-██████╔╝ ███████║ ██████╔╝ ███████║ ███████║ █████╗   ██║
-██╔══██╗ ██╔══██║ ██╔═══╝  ██╔══██║ ██╔══██║ ██╔══╝   ██║
-██║  ██║ ██║  ██║ ██║      ██║  ██║ ██║  ██║ ███████╗ ███████╗
-╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚═╝      ╚═╝  ╚═╝ ╚═╝  ╚═╝ ╚══════╝ ╚══════╝
-
-          █████╗   ██████╗  ███████╗ ███╗   ██╗ ████████╗
-         ██╔══██╗ ██╔════╝  ██╔════╝ ████╗  ██║ ╚══██╔══╝
-         ███████║ ██║  ███╗ █████╗   ██╔██╗ ██║    ██║
-         ██╔══██║ ██║   ██║ ██╔══╝   ██║╚██╗██║    ██║
-    ██╗  ██║  ██║ ╚██████╔╝ ███████╗ ██║ ╚████║    ██║
-    ╚═╝  ╚═╝  ╚═╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝    ╚═╝`.trimStart();
-
 function TypingLine({ text, delay }: { text: string; delay: number }) {
   const [displayed, setDisplayed] = useState("");
   const [started, setStarted] = useState(false);
@@ -57,15 +42,19 @@ export default function HeroSection() {
   return (
     <section className="w-full py-16 md:py-24 text-center overflow-hidden">
       <div className="container mx-auto px-4">
-        <motion.pre
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8 }}
-          className="font-mono text-[5px] leading-[1.1] sm:text-[7px] md:text-[9px] lg:text-xs xl:text-sm whitespace-pre inline-block text-left"
-          style={{ color: "var(--foreground)" }}
+          className="inline-block"
         >
-          {ASCII_ART}
-        </motion.pre>
+          <h1 className="font-mono text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none" style={{ color: "var(--foreground)" }}>
+            RAPHAEL
+          </h1>
+          <h1 className="font-mono text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none" style={{ color: "var(--foreground)" }}>
+            <span style={{ color: "var(--accent)" }}>.</span>AGENT
+          </h1>
+        </motion.div>
 
         <div
           className="mt-8 font-mono text-sm md:text-base space-y-1"
