@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { motion } from "motion/react";
 import type { AgentFile } from "@/data/agent-files";
 import type { ChatMessage } from "@/hooks/useAgentChat";
+import TerminalRenderer from "./TerminalRenderer";
 
 type Props = {
   selectedFile: AgentFile | null;
@@ -43,11 +44,25 @@ function TerminalTitleBar() {
 
 function MessageBlock({ msg }: { msg: ChatMessage }) {
   if (msg.role === "file") {
+    // Extract header line (▶ reading ...) and content
+    const lines = msg.content.split("\n");
+    const headerLine = lines[0] ?? "";
+    const separator = lines[1] ?? "";
+    const fileContent = lines.slice(2).join("\n");
+    const isJson = headerLine.includes(".json");
+
     return (
       <div className="mb-3">
-        <pre className="font-mono text-[13px] leading-relaxed whitespace-pre-wrap break-words" style={{ color: "#ccc" }}>
-          {msg.content}
-        </pre>
+        <div className="font-mono text-[13px] mb-1" style={{ color: "#999" }}>
+          {headerLine}
+        </div>
+        <div className="font-mono text-[13px] mb-2" style={{ color: "#444" }}>
+          {separator}
+        </div>
+        <TerminalRenderer
+          content={fileContent}
+          contentType={isJson ? "json" : "markdown"}
+        />
       </div>
     );
   }
