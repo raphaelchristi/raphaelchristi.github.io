@@ -39,7 +39,7 @@ function parseLinks(line: string): React.ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#4ade80" }}
+          style={{ color: "#5070ff" }}
         >
           {earliest.match[1]}
         </a>,
@@ -53,7 +53,7 @@ function parseLinks(line: string): React.ReactNode {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2 hover:opacity-80"
-          style={{ color: "#4ade80" }}
+          style={{ color: "#5070ff" }}
         >
           {earliest.match[0]}
         </a>,
@@ -65,45 +65,97 @@ function parseLinks(line: string): React.ReactNode {
   return parts;
 }
 
+function parseBold(text: string): React.ReactNode {
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    const boldMatch = /\*\*(.+?)\*\*/.exec(remaining);
+    const linkMatch = LINK_RE.exec(remaining);
+
+    const matches = [
+      boldMatch ? { type: "bold" as const, match: boldMatch, index: boldMatch.index } : null,
+      linkMatch ? { type: "link" as const, match: linkMatch, index: linkMatch.index } : null,
+    ]
+      .filter((m): m is NonNullable<typeof m> => m !== null)
+      .sort((a, b) => a.index - b.index);
+
+    if (matches.length === 0) {
+      parts.push(remaining);
+      break;
+    }
+
+    const earliest = matches[0]!;
+    if (earliest.index > 0) {
+      parts.push(remaining.slice(0, earliest.index));
+    }
+
+    if (earliest.type === "bold") {
+      parts.push(
+        <span key={key++} className="font-bold" style={{ color: "#e0e4ef" }}>
+          {earliest.match[1]}
+        </span>,
+      );
+    } else {
+      parts.push(
+        <a
+          key={key++}
+          href={earliest.match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:opacity-80"
+          style={{ color: "#5070ff" }}
+        >
+          {earliest.match[1]}
+        </a>,
+      );
+    }
+    remaining = remaining.slice(earliest.index + earliest.match[0].length);
+  }
+
+  return parts;
+}
+
 function renderMarkdownAsTerminal(content: string): React.ReactNode {
   const lines = content.split("\n");
   return lines.map((line, i) => {
     let processed = line;
 
-    // Headings → bold green with # prefix
+    // Headings → remove # prefix, render bold with size
     if (processed.startsWith("# ")) {
       return (
-        <div key={i} className="mt-2 first:mt-0 mb-1 font-bold" style={{ color: "#4ade80" }}>
-          {parseLinks(processed)}
+        <div key={i} className="mt-3 first:mt-0 mb-2 font-bold text-[18px]" style={{ color: "#e0e4ef" }}>
+          {parseBold(processed.slice(2))}
         </div>
       );
     }
     if (processed.startsWith("## ")) {
       return (
-        <div key={i} className="mt-3 mb-1 font-bold" style={{ color: "#4ade80", opacity: 0.9 }}>
-          {parseLinks(processed)}
+        <div key={i} className="mt-4 mb-2 font-bold text-[15px]" style={{ color: "#c0c8e0" }}>
+          {parseBold(processed.slice(3))}
         </div>
       );
     }
     if (processed.startsWith("### ")) {
       return (
-        <div key={i} className="mt-2 mb-1 font-bold" style={{ color: "#4ade80", opacity: 0.8 }}>
-          {parseLinks(processed)}
+        <div key={i} className="mt-3 mb-1 font-semibold text-[14px]" style={{ color: "#b0b8d0" }}>
+          {parseBold(processed.slice(4))}
         </div>
       );
     }
 
-    // List items → keep the dash, green bullet
+    // List items → green bullet, remove dash
     if (processed.startsWith("- ")) {
       return (
         <div key={i}>
-          <span style={{ color: "#4ade80" }}>  ▸ </span>
-          {parseLinks(processed.slice(2))}
+          <span style={{ color: "#5070ff" }}>  ▸ </span>
+          {parseBold(processed.slice(2))}
         </div>
       );
     }
 
-    // Bold markers → just render with brightness
+    // Strip bold markers for plain text
     processed = processed.replace(/\*\*(.+?)\*\*/g, "$1");
 
     // Empty lines
@@ -128,7 +180,7 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
 
   return (
     <>
-      <span style={{ color: "#888" }}>{"{"}</span>
+      <span style={{ color: "#7a8299" }}>{"{"}</span>
       {"\n"}
       {entries.map(([key, value], idx) => {
         const strValue = String(value);
@@ -138,15 +190,15 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
         return (
           <span key={key}>
             {"  "}
-            <span style={{ color: "#4ade80" }}>&quot;{key}&quot;</span>
-            <span style={{ color: "#888" }}>: </span>
+            <span style={{ color: "#5070ff" }}>&quot;{key}&quot;</span>
+            <span style={{ color: "#7a8299" }}>: </span>
             {isUrl ? (
               <a
                 href={strValue}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline underline-offset-2 hover:opacity-80"
-                style={{ color: "#fbbf24" }}
+                style={{ color: "#a5b4fc" }}
               >
                 &quot;{strValue}&quot;
               </a>
@@ -154,21 +206,21 @@ function renderJsonAsTerminal(content: string): React.ReactNode {
               <a
                 href={`mailto:${strValue}`}
                 className="underline underline-offset-2 hover:opacity-80"
-                style={{ color: "#fbbf24" }}
+                style={{ color: "#a5b4fc" }}
               >
                 &quot;{strValue}&quot;
               </a>
             ) : (
-              <span style={{ color: "#fbbf24" }}>
+              <span style={{ color: "#a5b4fc" }}>
                 &quot;{strValue}&quot;
               </span>
             )}
-            {idx < entries.length - 1 && <span style={{ color: "#888" }}>,</span>}
+            {idx < entries.length - 1 && <span style={{ color: "#7a8299" }}>,</span>}
             {"\n"}
           </span>
         );
       })}
-      <span style={{ color: "#888" }}>{"}"}</span>
+      <span style={{ color: "#7a8299" }}>{"}"}</span>
     </>
   );
 }
@@ -184,8 +236,8 @@ export default function TerminalRenderer({
     <pre
       className="font-mono text-[13px] md:text-[14px] leading-relaxed whitespace-pre-wrap break-words"
       style={{
-        color: "#d4d4d4",
-        textShadow: "0 0 8px rgba(74, 222, 128, 0.15)",
+        color: "#c0c8e0",
+        textShadow: "0 0 8px rgba(80, 112, 255, 0.1)",
       }}
     >
       {contentType === "json"

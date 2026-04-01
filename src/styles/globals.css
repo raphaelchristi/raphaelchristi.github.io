@@ -12,18 +12,18 @@
 
 :root {
   --radius: 0.5rem;
-  --background: #0a0a0a;
-  --foreground: #e0e0e0;
-  --muted: #888888;
-  --accent: #4ade80;
-  --primary: #60a5fa;
-  --sidebar-bg: #1a1a1a;
-  --border: #2a2a2a;
-  --selected: #2a2a2a;
-  --tab-bg: #1a1a1a;
-  --json-key: #60a5fa;
-  --json-string: #f97316;
-  --json-punct: #888888;
+  --background: #0a0e1a;
+  --foreground: #e0e4ef;
+  --muted: #7a8299;
+  --accent: #5070ff;
+  --primary: #5070ff;
+  --sidebar-bg: #0f1525;
+  --border: #1a2340;
+  --selected: #1a2340;
+  --tab-bg: #0f1525;
+  --json-key: #5070ff;
+  --json-string: #a5b4fc;
+  --json-punct: #7a8299;
 }
 
 @layer base {

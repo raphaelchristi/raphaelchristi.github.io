@@ -22,8 +22,8 @@ function TerminalTitleBar() {
     <div
       className="flex items-center h-10 px-4 shrink-0 rounded-t-lg"
       style={{
-        backgroundColor: "#3a3a3a",
-        borderBottom: "1px solid #4a4a4a",
+        backgroundColor: "#111827",
+        borderBottom: "1px solid #1a2340",
       }}
     >
       <div className="flex items-center gap-2">
@@ -33,7 +33,7 @@ function TerminalTitleBar() {
       </div>
       <span
         className="flex-1 text-center text-[13px] font-mono"
-        style={{ color: "#999" }}
+        style={{ color: "#7a8299" }}
       >
         raphael.agent — bash
       </span>
@@ -53,10 +53,10 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
 
     return (
       <div className="mb-3">
-        <div className="font-mono text-[13px] mb-1" style={{ color: "#999" }}>
+        <div className="font-mono text-[13px] mb-1" style={{ color: "#7a8299" }}>
           {headerLine}
         </div>
-        <div className="font-mono text-[13px] mb-2" style={{ color: "#444" }}>
+        <div className="font-mono text-[13px] mb-2" style={{ color: "#1a2340" }}>
           {separator}
         </div>
         <TerminalRenderer
@@ -70,17 +70,17 @@ function MessageBlock({ msg }: { msg: ChatMessage }) {
   if (msg.role === "user") {
     return (
       <div className="mb-1">
-        <span className="font-mono text-[13px]"><span style={{ color: "#78d97c" }}>raphael@agent</span><span style={{ color: "#ccc" }}>:</span><span style={{ color: "#6cb6ff" }}>~</span><span style={{ color: "#ccc" }}>$ </span></span>
-        <span className="font-mono text-[13px]" style={{ color: "#f0f0f0" }}>{msg.content}</span>
+        <span className="font-mono text-[13px]"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
+        <span className="font-mono text-[13px]" style={{ color: "#e0e4ef" }}>{msg.content}</span>
       </div>
     );
   }
 
   return (
     <div className="mb-3">
-      <span className="font-mono text-[13px] whitespace-pre-wrap break-words" style={{ color: "#ccc" }}>
+      <span className="font-mono text-[13px] whitespace-pre-wrap break-words" style={{ color: "#c0c8e0" }}>
         {msg.content}
-        {msg.content === "" && <span className="animate-pulse" style={{ color: "#f0f0f0" }}>▊</span>}
+        {msg.content === "" && <span className="animate-pulse" style={{ color: "#e0e4ef" }}>▊</span>}
       </span>
     </div>
   );
@@ -144,7 +144,7 @@ export default function ContentPanel({
       <div
         ref={scrollRef}
         className="flex-1 overflow-auto p-4 md:p-5 cursor-text"
-        style={{ backgroundColor: "#1c1c1e" }}
+        style={{ backgroundColor: "#0a0e1a" }}
         onClick={focusInput}
       >
         {/* Status line */}
@@ -153,7 +153,7 @@ export default function ContentPanel({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="mb-3 font-mono text-[13px]"
-            style={{ color: "#999" }}
+            style={{ color: "#7a8299" }}
           >
             {chatEnabled
               ? "Welcome to raphael.agent. Type a question or browse files."
@@ -169,7 +169,7 @@ export default function ContentPanel({
         {/* Inline prompt */}
         {!isLoading && (
           <div className="flex items-start font-mono text-[13px]">
-            <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#78d97c" }}>raphael@agent</span><span style={{ color: "#ccc" }}>:</span><span style={{ color: "#6cb6ff" }}>~</span><span style={{ color: "#ccc" }}>$ </span></span>
+            <span className="font-mono text-[13px] shrink-0"><span style={{ color: "#5070ff" }}>raphael@agent</span><span style={{ color: "#c0c8e0" }}>:</span><span style={{ color: "#818cf8" }}>~</span><span style={{ color: "#c0c8e0" }}>$ </span></span>
             {chatEnabled ? (
               <span
                 ref={inputRef}
@@ -179,13 +179,13 @@ export default function ContentPanel({
                 onInput={handleInput}
                 className="outline-none flex-1 min-w-[1px]"
                 style={{
-                  color: "#f0f0f0",
+                  color: "#e0e4ef",
                   caretColor: "#f0f0f0",
                 }}
                 spellCheck={false}
               />
             ) : (
-              <span className="animate-pulse" style={{ color: "#f0f0f0" }}>▊</span>
+              <span className="animate-pulse" style={{ color: "#e0e4ef" }}>▊</span>
             )}
           </div>
         )}
