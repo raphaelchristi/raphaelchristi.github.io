@@ -1,14 +1,12 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
-
-// TRPCReactProvider removido, pois a página atual do portfólio é estática
-// import { TRPCReactProvider } from "~/trpc/react";
+import { Geist, JetBrains_Mono } from "next/font/google";
 
 export const metadata: Metadata = {
-  title: "Raphael Valdetaro - LLM Developer & Research Engineer",
-  description: "Portfolio of Raphael Valdetaro, LLM Developer and Research Engineer specializing in creating innovative web applications and AI solutions.",
+  title: "RAPHAEL.AGENT — Research Engineer & LLM Developer",
+  description:
+    "Raphael Valdetaro — Research Engineer & LLM Developer. AI agent-themed portfolio.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -17,14 +15,17 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains-mono",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} dark`}>
-      <body>
-        {children}
-      </body>
+    <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable}`}>
+      <body>{children}</body>
     </html>
   );
 }
