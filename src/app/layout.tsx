@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, JetBrains_Mono, Press_Start_2P } from "next/font/google";
+import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "RAPHAEL.AGENT — Research Engineer & LLM Developer",
@@ -15,22 +15,17 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-});
-
-const pressStart2P = Press_Start_2P({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-pixel",
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${jetbrainsMono.variable} ${pressStart2P.variable}`}>
+    <html lang="en" className={geist.variable}>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

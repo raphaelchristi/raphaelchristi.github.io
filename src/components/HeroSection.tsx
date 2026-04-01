@@ -59,7 +59,7 @@ export default function HeroSection() {
           aria-hidden="true"
           className="mb-7 overflow-x-auto"
           style={{
-            fontFamily: "var(--font-jetbrains-mono), monospace",
+            fontFamily: "'JetBrains Mono', monospace",
             fontVariantLigatures: "none",
             fontSize: "clamp(4px, 0.95vw, 11px)",
             lineHeight: 1.15,
