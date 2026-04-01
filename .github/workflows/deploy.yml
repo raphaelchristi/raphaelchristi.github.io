@@ -30,6 +30,7 @@ jobs:
       - run: npx next build
         env:
           SKIP_ENV_VALIDATION: true
+          NEXT_PUBLIC_AGENT_API_URL: https://agent.chrismdf.com.br
 
       - uses: actions/upload-pages-artifact@v3
         with:
