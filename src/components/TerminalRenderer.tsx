@@ -136,7 +136,7 @@ function parseBold(text: string): React.ReactNode {
 function renderMarkdownAsTerminal(content: string): React.ReactNode {
   const lines = content.split("\n");
   return lines.map((line, i) => {
-    let processed = line;
+    const processed = line;
 
     // Headings → remove # prefix, render bold with size
     if (processed.startsWith("# ")) {
@@ -182,16 +182,13 @@ function renderMarkdownAsTerminal(content: string): React.ReactNode {
       );
     }
 
-    // Strip bold markers for plain text
-    processed = processed.replace(/\*\*(.+?)\*\*/g, "$1");
-
     // Empty lines
     if (processed.trim() === "") {
       return <div key={i} className="h-2" />;
     }
 
-    // Regular text
-    return <div key={i}>{parseLinks(processed)}</div>;
+    // Regular text — parse bold, italic, code, links
+    return <div key={i}>{parseBold(processed)}</div>;
   });
 }
 

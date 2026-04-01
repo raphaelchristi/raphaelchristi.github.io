@@ -234,12 +234,21 @@ export default function ContentPanel({
               suppressContentEditableWarning
               onKeyDown={handleKeyDown}
               onInput={handleInput}
-              className="outline-none flex-1 min-w-[1px]"
+              className="outline-none min-w-[1px]"
               style={{
                 color: "#e0e4ef",
-                caretColor: "#f0f0f0",
+                caretColor: "transparent",
               }}
               spellCheck={false}
+            />
+            <span
+              className="animate-pulse inline-block"
+              style={{
+                width: "8px",
+                height: "16px",
+                backgroundColor: "#e0e4ef",
+                marginLeft: "1px",
+              }}
             />
           </div>
         )}
